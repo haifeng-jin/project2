@@ -41,6 +41,8 @@ public interface ParserConstants {
     "<table_name>",
     "<attribute_name>",
     "<column_name>",
+    "\"DROP\"",
+    "\"TABLE\"",
   };
 
 }
