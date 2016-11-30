@@ -1,20 +1,17 @@
-/**
+package function; /**
  * Created by Tao on 11/18/2016.
  */
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import storageManager.*;
 
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.regex.*;
-public class mainFunction {
+
+public class Function {
 
     static MainMemory mem=null;
     static Disk disk=null;
     static SchemaManager schema_manager=null;
-    mainFunction() {
+    public Function() {
         mem = new MainMemory();
         disk = new Disk();
         // System.out.print("The memory contains " + mem.getMemorySize() + " blocks" + "\n");
@@ -23,7 +20,7 @@ public class mainFunction {
         System.out.println("hello world");
     }
 
-    private void createTable(String TableName,ArrayList<String> DataNames,ArrayList<String> Datatypes)
+    public void createTable(String TableName, ArrayList<String> DataNames, ArrayList<String> Datatypes)
     {
         System.out.println("Creating a schema");
         ArrayList<FieldType> field_types=new ArrayList<FieldType>();
@@ -118,7 +115,7 @@ public class mainFunction {
             DataNames.add(new ArrayList<String>(Arrays.asList(names[i])));
             DataValues.add(new ArrayList<String>(Arrays.asList(values[i])));
         }
-        mainFunction mf=new mainFunction();
+        Function mf=new Function();
 
         String TableName="wangtao";
         //create table
