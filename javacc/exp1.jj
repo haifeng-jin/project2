@@ -105,11 +105,6 @@ AttributeTypeList attributeItem(): {Token t1; Token t2;} {
 	t1=<name> t2=<data_type> { return new AttributeTypeList(new AttributeItem(t1.image, t2.image), null);}
 }
 
-Exp S(): {Token e;}
-{
-	e=<name> {return new TableName(e.image);}
-}
-
 Exp E(): {Exp e1; Exp e2;}
 {
 	e1=T() ("+" e2=T() {e1 = new BinaryExp("+", e1, e2);} )* {return e1;}
