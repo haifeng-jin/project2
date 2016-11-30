@@ -1,0 +1,48 @@
+PARSER_BEGIN(Parser)
+
+public class Parser {
+	public static void main(String[] args) throws Exception {
+			Exp result = new Parser(new java.io.StringReader(args[0])).statement();
+			System.out.println(result);
+	}
+}
+
+PARSER_END(Parser)
+
+SKIP:  { " " | "\t" | "\n" | "\r" }
+TOKEN: { "(" | ")" | "+" | "*" |
+	       <digit: ["0"-"9"]> |
+		       <letter: ["a"-"z"]> |
+		       <integer: (<digit>)+> |
+			<data_type: "INT"|"STR20"> |
+		       <name: <letter>(<digit>|<letter>)*> |
+		       <column_name: (<name>".")<name> >
+       }
+
+Exp statement(): {Exp e;}
+{
+	e = dropTableStatement() {return e;} |
+	e = createTableStatement() {return e;}
+}
+
+Exp dropTableStatement(): {Token t;}
+{
+	"DROP" "TABLE" t=<name> {return new DropTable(t.image);}
+}
+
+Exp createTableStatement(): {AttributeTypeList e; Token t;}
+{
+	"CREATE" "TABLE" t=<name> "(" e=attributeTypeList() ")" {return new CreateTable(t.image, e);}
+}
+
+AttributeTypeList attributeTypeList(): {AttributeTypeList list1; AttributeTypeList list2;}
+{
+	list1=attributeItem() ("," list2=attributeItem() {list1 = new AttributeTypeList(list2.item, list1);})* {
+		return list1;
+	}
+}
+
+AttributeTypeList attributeItem(): {Token t1; Token t2;} {
+	t1=<name> t2=<data_type> { return new AttributeTypeList(new AttributeItem(t1.image, t2.image), null);}
+}
+
