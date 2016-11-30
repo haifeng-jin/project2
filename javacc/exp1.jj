@@ -16,6 +16,44 @@ class DropTable extends Exp{
 	}
 	public String toString() {return "drop table: " + tableName + "";}
 }
+
+class AttributeItem extends Exp{
+	String attributeName;
+	String dataType;
+	AttributeItem(String attributeName, String dataType) {
+		this.attributeName = attributeName;
+		this.dataType = dataType;
+	}
+	public String toString() {
+		return attributeName + " " + dataType;
+	}
+}
+
+class AttributeTypeList extends Exp{
+	public AttributeItem item;
+	AttributeTypeList list;
+	AttributeTypeList(AttributeItem item, AttributeTypeList list) {
+		this.item = item;
+		this.list = list;
+	}
+	public String toString() {
+		if (list == null)
+			return item.toString();
+		return list.toString() + ", " + item.toString();
+	}
+}
+
+class CreateTable extends Exp{
+	String tableName;
+	AttributeTypeList attributeTypeList;
+	CreateTable(String tableName, AttributeTypeList attributeTypeList) {
+		this.tableName = tableName;
+		this.attributeTypeList = attributeTypeList;
+	}
+	public String toString() {
+		return "create table: " + tableName + " (" + attributeTypeList + ")";
+	}
+}
 class Num extends Exp {
 	int value;
 	Num(int v) {value = v;}
@@ -35,9 +73,9 @@ TOKEN: { "(" | ")" | "+" | "*" |
 	       <digit: ["0"-"9"]> |
 		       <letter: ["a"-"z"]> |
 		       <integer: (<digit>)+> |
-		       <table_name: <letter>(<digit>|<letter>)*> |
-		       <attribute_name: <letter>(<digit>|<letter>)*> |
-		       <column_name: (<table_name>".")<attribute_name> >
+			<data_type: "INT"|"STR20"> |
+		       <name: <letter>(<digit>|<letter>)*> |
+		       <column_name: (<name>".")<name> >
        }
 
 Exp statement(): {Exp e;}
@@ -48,16 +86,28 @@ Exp statement(): {Exp e;}
 
 Exp dropTableStatement(): {Token t;}
 {
-	"DROP" "TABLE" t=<table_name> {return new DropTable(t.image);}
+	"DROP" "TABLE" t=<name> {return new DropTable(t.image);}
 }
 
-Exp createTableStatement(): {Exp e; Token t;}
+Exp createTableStatement(): {AttributeTypeList e; Token t;}
 {
+	"CREATE" "TABLE" t=<name> "(" e=attributeTypeList() ")" {return new CreateTable(t.image, e);}
+}
+
+AttributeTypeList attributeTypeList(): {AttributeTypeList list1; AttributeTypeList list2;}
+{
+	list1=attributeItem() ("," list2=attributeItem() {list1 = new AttributeTypeList(list2.item, list1);})* {
+		return list1;
+	}
+}
+
+AttributeTypeList attributeItem(): {Token t1; Token t2;} {
+	t1=<name> t2=<data_type> { return new AttributeTypeList(new AttributeItem(t1.image, t2.image), null);}
 }
 
 Exp S(): {Token e;}
 {
-	e=<table_name> {return new TableName(e.image);}
+	e=<name> {return new TableName(e.image);}
 }
 
 Exp E(): {Exp e1; Exp e2;}
