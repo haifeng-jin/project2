@@ -1,59 +1,28 @@
 /**
  * Created by Tao on 11/18/2016.
  */
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import storageManager.*;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.regex.*;
 public class mainFunction {
 
-    MainMemory mem=null;
-    Disk disk=null;
-    SchemaManager schema_manager=null;
-    mainFunction()
-    {
-         mem=new MainMemory();
-         disk=new Disk();
-       // System.out.print("The memory contains " + mem.getMemorySize() + " blocks" + "\n");
-       // System.out.print(mem + "\n" + "\n");
-        schema_manager=new SchemaManager(mem,disk);
+    static MainMemory mem=null;
+    static Disk disk=null;
+    static SchemaManager schema_manager=null;
+    mainFunction() {
+        mem = new MainMemory();
+        disk = new Disk();
+        // System.out.print("The memory contains " + mem.getMemorySize() + " blocks" + "\n");
+        // System.out.print(mem + "\n" + "\n");
+        schema_manager = new SchemaManager(mem, disk);
         System.out.println("hello world");
     }
 
-    private boolean isNumeric(String str)
-    {
-        Pattern pattern=Pattern.compile("[0-9]*");
-        Matcher isNum=pattern.matcher(str);
-        return isNum.matches();
-    }
-    private static void appendTupleToRelation(Relation relation_reference, MainMemory mem, int memory_block_index, Tuple tuple) {
-        Block block_reference;
-        if (relation_reference.getNumOfBlocks()==0) {
-            System.out.print("The relation is empty" + "\n");
-            System.out.print("Get the handle to the memory block " + memory_block_index + " and clear it" + "\n");
-            block_reference=mem.getBlock(memory_block_index);
-            block_reference.clear(); //clear the block
-            block_reference.appendTuple(tuple); // append the tuple
-            System.out.print("Write to the first block of the relation" + "\n");
-            relation_reference.setBlock(relation_reference.getNumOfBlocks(),memory_block_index);
-        } else {
-            System.out.print("Read the last block of the relation into memory block 5:" + "\n");
-            relation_reference.getBlock(relation_reference.getNumOfBlocks()-1,memory_block_index);
-            block_reference=mem.getBlock(memory_block_index);
-
-            if (block_reference.isFull()) {
-                System.out.print("(The block is full: Clear the memory block and append the tuple)" + "\n");
-                block_reference.clear(); //clear the block
-                block_reference.appendTuple(tuple); // append the tuple
-                System.out.print("Write to a new block at the end of the relation" + "\n");
-                relation_reference.setBlock(relation_reference.getNumOfBlocks(),memory_block_index); //write back to the relation
-            } else {
-                System.out.print("(The block is not full: Append it directly)" + "\n");
-                block_reference.appendTuple(tuple); // append the tuple
-                System.out.print("Write to the last block of the relation" + "\n");
-                relation_reference.setBlock(relation_reference.getNumOfBlocks()-1,memory_block_index); //write back to the relation
-            }
-        }
-    }
     private void createTable(String TableName,ArrayList<String> DataNames,ArrayList<String> Datatypes)
     {
         System.out.println("Creating a schema");
@@ -79,17 +48,17 @@ public class mainFunction {
         System.out.flush();
     }
 
-    private void insertIntoTable(String TableName,ArrayList<String> DataNames,ArrayList<String> DataValues)
+    private void insertIntoTable(Relation relation_reference,ArrayList<String> DataNames,ArrayList<String> DataValues,Block block)
     {
-        Relation relation_reference=schema_manager.getRelation(TableName);
         Tuple tuple = relation_reference.createTuple(); //The only way to create a tuple is to call "Relation"
         int n=DataNames.size();
+        Schema sc=relation_reference.getSchema();
         for(int i=0;i<n;++i)
         {
-            if(isNumeric(DataValues.get(i)))tuple.setField(DataNames.get(i),Integer.parseInt(DataValues.get(i)));
-            else tuple.setField(DataNames.get(i),DataValues.get(i));
+            if(sc.getFieldType(i).equals(FieldType.STR20))tuple.setField(DataNames.get(i),DataValues.get(i));
+            else tuple.setField(DataNames.get(i),Integer.parseInt(DataValues.get(i)));
         }
-        System.out.print("Created a tuple " + tuple + " of"+ TableName +"through the relation" + "\n");
+        System.out.print("Created a tuple " + tuple + " of"+"through the relation" + "\n");
         System.out.print("The tuple is invalid? " + (tuple.isNull()?"TRUE":"FALSE") + "\n");
         Schema tuple_schema = tuple.getSchema();
         System.out.print("The tuple has schema" + "\n");
@@ -103,40 +72,71 @@ public class mainFunction {
             else
                 System.out.print(tuple.getField(i) + "\t");
         }
+        block.appendTuple(tuple);
+        //System.out.print("The table currently have " + relation_reference.getNumOfTuples() + " tuples" + "\n" + "\n");
         System.out.print("\n");
         System.out.flush();
     }
+    private void flushToRelation(Relation relation_reference,ArrayList<ArrayList<String>>DataName,ArrayList<ArrayList<String>>DataValues)
+    {
+        int blockindex=0;
+        Block block_ptr=mem.getBlock(blockindex);
+        block_ptr.clear();
+        for(int i=0;i<DataName.size();++i)
+        {
+            if(block_ptr.isFull())
+            {
+                block_ptr=mem.getBlock(++blockindex);
+                block_ptr.clear();
+            }
+            insertIntoTable(relation_reference,DataName.get(i),DataValues.get(i),block_ptr);
+        }
+        for (int memory_block_index = 0; memory_block_index < Config.NUM_OF_BLOCKS_IN_MEMORY; ++memory_block_index)
+            if (!mem.getBlock(memory_block_index).isEmpty())relation_reference.setBlock(relation_reference.getNumOfBlocks(), memory_block_index);
+    }
+    private void insertIntoTableNtimes(String TableName,ArrayList<ArrayList<String>>DataName,ArrayList<ArrayList<String>>DataValues)
+    {
+        Relation relation_reference=schema_manager.getRelation(TableName);
+        int capacity=relation_reference.getSchema().getTuplesPerBlock()*Config.NUM_OF_BLOCKS_IN_MEMORY;
+        int times=DataName.size()/capacity+1;
+        while(--times>=0)flushToRelation(relation_reference,DataName,DataValues);
+    }
+
+
     public static void main(String[] args) {
         //create table
-        ArrayList<String> field_names=new ArrayList<String>();
-        ArrayList<String> field_types=new ArrayList<String>();
-        field_names.add("f1");
-        field_names.add("f2");
-        field_names.add("f3");
-        field_names.add("f4");
-        field_types.add("STR20");
-        field_types.add("STR20");
-        field_types.add("INT");
-        field_types.add("STR20");
+        String []name={"f1","f2","f3","f4"};
+        String []type={"STR20", "INT", "INT", "STR20"};
+        String [][]names={{ "f1", "f2", "f3", "f4" }, { "f1", "f2", "f3", "f4" }, { "f1", "f2", "f3", "f4" }, { "f1", "f2", "f3", "f4" }};
+        String [][]values={{ "h1", "20", "30", "h2" }, { "h3", "40", "50", "h4" }, { "h5", "60", "70", "h6" }, { "h7", "80", "90", "h8" }};
+        ArrayList<String> field_name=new ArrayList<String>(Arrays.asList(name));
+        ArrayList<String> field_type=new ArrayList<String>(Arrays.asList(type));
+        ArrayList<ArrayList<String>>DataNames=new ArrayList<ArrayList<String>>();
+        ArrayList<ArrayList<String>>DataValues=new ArrayList<ArrayList<String>>();
+        for(int i=0;i<4;++i)
+        {
+            DataNames.add(new ArrayList<String>(Arrays.asList(names[i])));
+            DataValues.add(new ArrayList<String>(Arrays.asList(values[i])));
+        }
         mainFunction mf=new mainFunction();
 
         String TableName="wangtao";
         //create table
-        mf.createTable(TableName,field_names,field_types);
-        mf.createTable("hello",field_names,field_types);//
+        mf.createTable(TableName,field_name,field_type);
         //insert into table
-
-        ArrayList<String>DataValues=new ArrayList<String>();
-        DataValues.add("bupt");
-        DataValues.add("tamu");
-        DataValues.add("20");
-        DataValues.add("china");
-
         System.out.println("Insert into table");
-        mf.insertIntoTable(TableName,field_names,DataValues);
+        mf.insertIntoTableNtimes(TableName,DataNames,DataValues);
+        Relation relation_reference=schema_manager.getRelation(TableName);
+        System.out.println("-----------relation-------------------------");
+        System.out.print(relation_reference + "\n");
+        System.out.println("----------memory--------------------------");
+        System.out.print(mem + "\n");
+
 
         System.out.println("------------------------------------");
         System.out.println("Drop table");
+        TableName="taobupt";
+        mf.createTable(TableName,field_name,field_type);
         mf.dropTable(TableName);
         System.out.println("done!");
 
