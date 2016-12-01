@@ -87,12 +87,12 @@ public class Function {
         System.out.print("\n");
         System.out.flush();
     }
-    private void flushToRelation(Relation relation_reference,ArrayList<ArrayList<String>>DataName,ArrayList<ArrayList<String>>DataValues)
+    private void flushToRelation(Relation relation_reference,ArrayList<ArrayList<String>>DataName,ArrayList<ArrayList<String>>DataValues,int start)
     {
         clearMem();
         int blockindex=0;
         Block block_ptr=mem.getBlock(blockindex);
-        for(int i=0;i<DataName.size();++i)
+        for(int i=start;i<DataName.size();++i)
         {
             if(block_ptr.isFull())
             {
@@ -118,7 +118,7 @@ public class Function {
         int start=0;
         while(--times>=0)
         {
-            flushToRelation(relation_reference,DataName,DataValues);
+            flushToRelation(relation_reference,DataName,DataValues,start);
             start+=capacity;
         }
     }
