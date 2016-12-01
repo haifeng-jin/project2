@@ -14,4 +14,8 @@ public class ValueList {
         this.value = new ArrayList<String>(list1.value);
         this.value.addAll(list2.value);
     }
+
+    public String toString() {
+        return value.toString();
+    }
 }

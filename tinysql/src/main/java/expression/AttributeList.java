@@ -16,4 +16,8 @@ public class AttributeList {
         this.nameList.addAll(list2.nameList);
     }
 
+    public String toString() {
+        return nameList.toString();
+    }
+
 }

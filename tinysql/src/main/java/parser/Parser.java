@@ -60,9 +60,13 @@ public class Parser implements ParserConstants {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case literal:
       t = jj_consume_token(literal);
+        String st = t.image;
+        st = st.substring(1, st.length() - 1);
+        {if (true) return new ValueList(st);}
       break;
     case integer:
       t = jj_consume_token(integer);
+        {if (true) return new ValueList(t.image);}
       break;
     case null_value:
       t = jj_consume_token(null_value);
@@ -185,7 +189,7 @@ public class Parser implements ParserConstants {
       jj_la1_init_0();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0xa00000,0x20000,0x11400,0x20000,0x20000,};
+      jj_la1_0 = new int[] {0xa00000,0x20000,0x10a00,0x20000,0x20000,};
    }
 
   /** Constructor with InputStream. */

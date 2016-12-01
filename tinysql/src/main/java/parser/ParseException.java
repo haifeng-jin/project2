@@ -4,7 +4,7 @@ package parser;
 
 /**
  * This exception is thrown when parse errors are encountered.
- * You can explicitly create objects of this exception typeList by
+ * You can explicitly create objects of this exception type by
  * calling the method generateParseException in the generated
  * parser.
  *
@@ -23,7 +23,7 @@ public class ParseException extends Exception {
   /**
    * This constructor is used by the method "generateParseException"
    * in the generated parser.  Calling this constructor generates
-   * a new object of this typeList with the fields "currentToken",
+   * a new object of this type with the fields "currentToken",
    * "expectedTokenSequences", and "tokenImage" set.
    */
   public ParseException(Token currentTokenVal,

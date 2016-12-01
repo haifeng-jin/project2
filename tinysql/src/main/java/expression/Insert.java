@@ -18,7 +18,11 @@ public class Insert extends Exp{
     public void execute(Function function) {
         ArrayList<ArrayList<String>> valueList = new ArrayList<ArrayList<String>>();
         valueList.add(tuples.list.value);
-//        function.insertIntoTableNtimes(tableName, list.nameList, valueList);
+        function.insertIntoTableNtimes(tableName, list.nameList, valueList);
+    }
+
+    public String toString() {
+        return "INSERT INTO " + tableName + " (" + list.nameList + ") " + tuples.list;
     }
 
 }

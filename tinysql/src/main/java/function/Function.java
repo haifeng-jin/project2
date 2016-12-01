@@ -108,7 +108,7 @@ public class Function {
             else break;
         }
     }
-    private void insertIntoTableNtimes(String TableName,ArrayList<String>DataName1,ArrayList<ArrayList<String>>DataValues)
+    public void insertIntoTableNtimes(String TableName,ArrayList<String>DataName1,ArrayList<ArrayList<String>>DataValues)
     {
         ArrayList<ArrayList<String>>DataName=new ArrayList<ArrayList<String>>();
         for(int j=0;j<DataValues.size();++j)DataName.add(DataName1);

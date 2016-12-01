@@ -11,13 +11,13 @@ public interface ParserConstants {
   /** End of File. */
   int EOF = 0;
   /** RegularExpression Id. */
-  int digit = 9;
+  int integer = 9;
   /** RegularExpression Id. */
-  int null_value = 10;
+  int digit = 10;
   /** RegularExpression Id. */
-  int letter = 11;
+  int null_value = 11;
   /** RegularExpression Id. */
-  int integer = 12;
+  int letter = 12;
   /** RegularExpression Id. */
   int data_type = 13;
   /** RegularExpression Id. */
@@ -41,16 +41,16 @@ public interface ParserConstants {
     "\")\"",
     "\"+\"",
     "\"*\"",
+    "<integer>",
     "<digit>",
     "\"NULL\"",
     "<letter>",
-    "<integer>",
     "<data_type>",
-    "<nameList>",
+    "<name>",
     "<column_name>",
     "<literal>",
     "\",\"",
-    "\"VALUE\"",
+    "\"VALUES\"",
     "\"INSERT\"",
     "\"INTO\"",
     "\"DROP\"",

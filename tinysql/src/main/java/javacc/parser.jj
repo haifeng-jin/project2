@@ -17,13 +17,13 @@ PARSER_END(Parser)
 
 SKIP:  { " " | "\t" | "\n" | "\r" }
 TOKEN: { "(" | ")" | "+" | "*" |
+		       <integer: (<digit>)+> |
 	       <digit: ["0"-"9"]> |
 	       <null_value: "NULL"> |
 		       <letter: ["a"-"z"]> |
-		       <integer: (<digit>)+> |
 			<data_type: "INT"|"STR20"> |
-		       <nameList: <letter>(<digit>|<letter>)*> |
-		       <column_name: (<nameList>".")<nameList> > |
+		       <name: <letter>(<digit>|<letter>)*> |
+		       <column_name: (<name>".")<name> > |
 		       <literal: "\""(~["\""])+"\"" >
        }
 
@@ -35,7 +35,7 @@ Exp statement(): {Exp e;}
 
 AttributeList attributeName(): {Token attributeName;}
 {
-    attributeName=<nameList> {
+    attributeName=<name> {
         return new AttributeList(attributeName.image);
     }
 }
@@ -49,7 +49,15 @@ AttributeList attributeList(): {AttributeList list1; AttributeList list2; }
 
 ValueList getValue(): {Token t; }
 {
-    t = <literal> | t=<integer> | t=<null_value>
+    t = <literal>
+    {
+        String st = t.image;
+        st = st.substring(1, st.length() - 1);
+        return new ValueList(st);
+    } | t=<integer>
+    {
+        return new ValueList(t.image);
+    } | t=<null_value>
     {
         return new ValueList(t.image);
     }
@@ -64,7 +72,7 @@ ValueList valueList(): {ValueList list1; ValueList list2;}
 
 InsertTuples insertTuples(): {ValueList list; }
 {
-    "VALUE" "(" list = valueList() ")"
+    "VALUES" "(" list = valueList() ")"
     {
         return new InsertTuples(list);
     }
@@ -72,7 +80,7 @@ InsertTuples insertTuples(): {ValueList list; }
 
 Insert insertStatement(): {Token tableName; AttributeList list; InsertTuples tuples; }
 {
-    "INSERT" "INTO" tableName = <nameList> "(" list = attributeList() ")" tuples = insertTuples()
+    "INSERT" "INTO" tableName = <name> "(" list = attributeList() ")" tuples = insertTuples()
     {
         return new Insert(tableName.image, list, tuples);
     }
@@ -80,15 +88,15 @@ Insert insertStatement(): {Token tableName; AttributeList list; InsertTuples tup
 
 DropTable dropTableStatement(): {Token t;}
 {
-	"DROP" "TABLE" t=<nameList> {return new DropTable(t.image);}
+	"DROP" "TABLE" t=<name> {return new DropTable(t.image);}
 }
 
 CreateTable createTableStatement(): {AttributeTypeList e; Token t;}
 {
-	"CREATE" "TABLE" t=<nameList> "(" e=list() ")" {return new CreateTable(t.image, e);}
+	"CREATE" "TABLE" t=<name> "(" e=attributeTypeList() ")" {return new CreateTable(t.image, e);}
 }
 
-AttributeTypeList list(): {AttributeTypeList list1; AttributeTypeList list2;}
+AttributeTypeList attributeTypeList(): {AttributeTypeList list1; AttributeTypeList list2;}
 {
 	list1=attributeItem() ("," list2=attributeItem() {
 	    list1 = new AttributeTypeList(list1, list2);
@@ -98,6 +106,6 @@ AttributeTypeList list(): {AttributeTypeList list1; AttributeTypeList list2;}
 }
 
 AttributeTypeList attributeItem(): {Token t1; Token t2;} {
-	t1=<nameList> t2=<data_type> { return new AttributeTypeList(t1.image, t2.image);}
+	t1=<name> t2=<data_type> { return new AttributeTypeList(t1.image, t2.image);}
 }
 
