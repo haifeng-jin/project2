@@ -20,6 +20,19 @@ public class Function {
         System.out.println("hello world");
     }
 
+
+
+    public void clearMem()
+    {
+        int i=0;
+        Block block=mem.getBlock(i++);
+        block.clear();
+        while(i<Config.NUM_OF_BLOCKS_IN_MEMORY)
+        {
+            block=mem.getBlock(i++);
+            block.clear();
+        }
+    }
     public void createTable(String TableName, ArrayList<String> DataNames, ArrayList<String> Datatypes)
     {
         System.out.println("Creating a schema");
@@ -76,27 +89,38 @@ public class Function {
     }
     private void flushToRelation(Relation relation_reference,ArrayList<ArrayList<String>>DataName,ArrayList<ArrayList<String>>DataValues)
     {
+        clearMem();
         int blockindex=0;
         Block block_ptr=mem.getBlock(blockindex);
-        block_ptr.clear();
         for(int i=0;i<DataName.size();++i)
         {
             if(block_ptr.isFull())
             {
-                block_ptr=mem.getBlock(++blockindex);
-                block_ptr.clear();
+                ++blockindex;
+                if(blockindex>=Config.NUM_OF_BLOCKS_IN_MEMORY)break;
+                block_ptr=mem.getBlock(blockindex);
             }
             insertIntoTable(relation_reference,DataName.get(i),DataValues.get(i),block_ptr);
         }
-        for (int memory_block_index = 0; memory_block_index < Config.NUM_OF_BLOCKS_IN_MEMORY; ++memory_block_index)
-            if (!mem.getBlock(memory_block_index).isEmpty())relation_reference.setBlock(relation_reference.getNumOfBlocks(), memory_block_index);
+        for (int memory_block_index = 0; memory_block_index < Config.NUM_OF_BLOCKS_IN_MEMORY; ++memory_block_index) {
+            if (!mem.getBlock(memory_block_index).isEmpty())
+                relation_reference.setBlock(relation_reference.getNumOfBlocks(), memory_block_index);
+            else break;
+        }
     }
-    private void insertIntoTableNtimes(String TableName,ArrayList<ArrayList<String>>DataName,ArrayList<ArrayList<String>>DataValues)
+    private void insertIntoTableNtimes(String TableName,ArrayList<String>DataName1,ArrayList<ArrayList<String>>DataValues)
     {
+        ArrayList<ArrayList<String>>DataName=new ArrayList<ArrayList<String>>();
+        for(int j=0;j<DataValues.size();++j)DataName.add(DataName1);
         Relation relation_reference=schema_manager.getRelation(TableName);
         int capacity=relation_reference.getSchema().getTuplesPerBlock()*Config.NUM_OF_BLOCKS_IN_MEMORY;
         int times=DataName.size()/capacity+1;
-        while(--times>=0)flushToRelation(relation_reference,DataName,DataValues);
+        int start=0;
+        while(--times>=0)
+        {
+            flushToRelation(relation_reference,DataName,DataValues);
+            start+=capacity;
+        }
     }
 
 
@@ -122,7 +146,7 @@ public class Function {
         mf.createTable(TableName,field_name,field_type);
         //insert into table
         System.out.println("Insert into table");
-        mf.insertIntoTableNtimes(TableName,DataNames,DataValues);
+        mf.insertIntoTableNtimes(TableName,field_name,DataValues);
         Relation relation_reference=schema_manager.getRelation(TableName);
         System.out.println("-----------relation-------------------------");
         System.out.print(relation_reference + "\n");
