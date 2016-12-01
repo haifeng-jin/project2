@@ -19,9 +19,9 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int data_type = 12;
   /** RegularExpression Id. */
-  int column_name = 13;
+  int name = 13;
   /** RegularExpression Id. */
-  int name = 14;
+  int column_name = 14;
   /** RegularExpression Id. */
   int letter = 15;
   /** RegularExpression Id. */
@@ -47,8 +47,8 @@ public interface ParserConstants {
     "<digit>",
     "\"NULL\"",
     "<data_type>",
-    "<column_name>",
     "<name>",
+    "<column_name>",
     "<letter>",
     "<literal>",
     "<comp>",
@@ -62,6 +62,12 @@ public interface ParserConstants {
     "\"OR\"",
     "\"AND\"",
     "\"-\"",
+    "\"SELECT\"",
+    "\"DISTINCT\"",
+    "\"FROM\"",
+    "\"WHERE\"",
+    "\"ORDER\"",
+    "\"BY\"",
   };
 
 }

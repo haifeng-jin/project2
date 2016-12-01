@@ -12,8 +12,8 @@ public class SearchConditionTest {
 
     @Test
     public void toStringTest() throws ParseException {
-        String searchConditionStatement = "a < b AND 1 = 1 OR asdf > 3 OR (1 + 1) = 2";
+        String searchConditionStatement = "abcd < b AND 1 = 1 OR asdf > 3 OR (1 + 1) = 2";
         SearchCondition searchCondition = new Parser(new StringReader(searchConditionStatement)).searchCondition();
-        assertEquals("CREATE TABLE table1 (nameList: [attr1, attr2] typeList: [INT, STR20])", searchCondition.toString());
+        assertEquals("[[abcd < b, 1 = 1], [asdf > 3], [1 + 1 = 2]]", searchCondition.toString());
     }
 }

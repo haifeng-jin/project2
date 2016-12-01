@@ -21,8 +21,8 @@ TOKEN: { "(" | ")" | "+" | "*" |
 	       <digit: ["0"-"9"]> |
 	       <null_value: "NULL"> |
 			<data_type: "INT"|"STR20"> |
-		       <column_name: (<name>".")<name> > |
 		       <name: <letter>(<digit>|<letter>)*> |
+		       <column_name: (<name>".")?<name> > |
 		       <letter: ["a"-"z"]> |
 		       <literal: "\""(~["\""])+"\"" > |
 		       <comp: "<" | ">" | "=">
@@ -150,7 +150,44 @@ String term(): {Token t;} {
         return t.image;
     } | t = <literal> {
         return t.image;
+    } | t = <name> {
+        return t.image;
     } | t = <integer> {
         return t.image;
+    }
+}
+
+Select select(): {SelectList columnList; TableList tableList; boolean distinct; SearchCondition condition; Token t; } {
+    "SELECT" {distinct = false; condition = null; t=new Token();} ("DISTINCT" { distinct = true; })? columnList = selectList() "FROM" tableList = tableList()
+    ("WHERE" condition = searchCondition())? ("ORDER" "BY" t=<name> | t=<column_name> )? {
+        return new Select(columnList, tableList, distinct, t.image, condition);
+    }
+}
+
+SelectList selectList(): {SelectList list1; SelectList list2; } {
+    "*" {
+        return new SelectList("*");
+    } | list1=singleSelectList() ("," list2=singleSelectList() { list1 = new SelectList(list1, list2); } )* {
+        return list1;
+    }
+}
+
+SelectList singleSelectList(): { Token t; } {
+    t = <column_name> {
+        return new SelectList(t.image);
+    }| t= <name> {
+        return new SelectList(t.image);
+    }
+}
+
+TableList tableList(): {TableList list1; TableList list2; } {
+    list1 = singleTableList() ("," list2 = singleTableList() { list1 = new TableList(list1, list2); })* {
+        return list1;
+    }
+}
+
+TableList singleTableList(): { Token t; } {
+    t = <name> {
+        return new TableList(t.image);
     }
 }

@@ -13,6 +13,6 @@ public class InsertTest {
     public void toStringTest() throws ParseException {
         String insertStatement = "INSERT INTO table1 (attr1, attr2) VALUES (\"abc\", 123)";
         Insert insert = new Parser(new StringReader(insertStatement)).insertStatement();
-        assertEquals("INSERT INTO table1 ([attr1, attr2]) [\"abc\", 123]", insert.toString());
+        assertEquals("INSERT INTO table1 ([attr1, attr2]) [abc, 123]", insert.toString());
     }
 }
