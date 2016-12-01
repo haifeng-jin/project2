@@ -1,6 +1,6 @@
 package expression;
 
-public class AttributeItem extends Exp{
+public class AttributeItem {
 	String attributeName;
 	String dataType;
 
@@ -12,5 +12,6 @@ public class AttributeItem extends Exp{
 	public String toString() {
 		return attributeName + " " + dataType;
 	}
+
 }
 

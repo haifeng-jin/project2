@@ -2,31 +2,26 @@ package expression;
 
 import java.util.ArrayList;
 
-public class AttributeTypeList extends Exp{
-    public AttributeItem item;
-    AttributeTypeList list;
+public class AttributeTypeList {
+    public ArrayList<String> nameList;
+    public ArrayList<String> typeList;
 
-    public AttributeTypeList(AttributeItem item, AttributeTypeList list) {
-        this.item = item;
-        this.list = list;
+    public AttributeTypeList(String nameList, String typeList) {
+        this.nameList = new ArrayList<String>();
+        this.typeList = new ArrayList<String>();
+        this.nameList.add(nameList);
+        this.typeList.add(typeList);
     }
 
-    public NameTypeList getNameTypeList() {
-        AttributeTypeList list = this;
-        ArrayList<String> nameList = new ArrayList<String>();
-        ArrayList<String> typeList = new ArrayList<String>();
-        while (list != null) {
-            nameList.add(list.item.attributeName);
-            typeList.add(list.item.dataType);
-            list = list.list;
-        }
-        return new NameTypeList(nameList, typeList);
+    public AttributeTypeList(AttributeTypeList list1, AttributeTypeList list2) {
+        this.nameList = new ArrayList<String>(list1.nameList);
+        this.typeList = new ArrayList<String>(list1.typeList);
+        this.nameList.addAll(list2.nameList);
+        this.typeList.addAll(list2.typeList);
     }
 
     public String toString() {
-        if (list == null)
-            return item.toString();
-        return list.toString() + ", " + item.toString();
+        return  "nameList: " + nameList + " typeList: " + typeList;
     }
 }
 

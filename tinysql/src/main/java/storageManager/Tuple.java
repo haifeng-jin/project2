@@ -8,7 +8,7 @@ import java.util.ListIterator;
  * A tuple contains at most MAX_NUM_OF_FIELDS_IN_RELATION=8 fields. 
  * Each field in a tuple has offset 0,1,2,... respectively, 
  *   according to the defined schema. 
- * You can access a field by its offset or its field name.
+ * You can access a field by its offset or its field nameList.
  * Usage: Most of cases you access the tuples in main memory,
  *          either through the MainMemory class,
  *          or through both the MainMemory and the Block class.
@@ -86,14 +86,14 @@ public class Tuple implements Serializable {
 	    fields.clear();
 	  }
 	
-	// returns false if the type is wrong or out of bound
+	// returns false if the typeList is wrong or out of bound
 	  public boolean setField(int offset,String s){
 	    Schema schema=schema_manager.schemas[schema_index];
 	    if (offset>=schema.getNumOfFields() || offset<0){
 	      System.err.print("setField ERROR: offset "+offset+" is out of bound!"+"\n");
 	      return false;
 	    } else if (schema.getFieldType(offset)!=FieldType.STR20) {
-	      System.err.print("setField ERROR: field type not FieldType.STR20!"+"\n");
+	      System.err.print("setField ERROR: field typeList not FieldType.STR20!"+"\n");
 	      return false;
 	    } else {
 	      fields.get(offset).str=s;
@@ -101,14 +101,14 @@ public class Tuple implements Serializable {
 	    return true;
 	  }
 	
-	// returns false if the type is wrong or out of bound
+	// returns false if the typeList is wrong or out of bound
 	  public boolean setField(int offset,int i){
 	    Schema schema=schema_manager.schemas[schema_index];
 	    if (offset>=schema.getNumOfFields() || offset<0){
 	      System.err.print("setField ERROR: offset "+offset+" is out of bound!"+"\n");
 	      return false;
 	    } else if (schema.getFieldType(offset)!=FieldType.INT) {
-	      System.err.print("setField ERROR: field type not FieldType.INT!"+"\n");
+	      System.err.print("setField ERROR: field typeList not FieldType.INT!"+"\n");
 	      return false;
 	    } else {
 	      fields.get(offset).integer=i;
@@ -116,16 +116,16 @@ public class Tuple implements Serializable {
 	    return true;
 	  }
 	
-	// returns false if the type is wrong or the name is not found
+	// returns false if the typeList is wrong or the nameList is not found
 	  public boolean setField(String field_name,String s){
 	    Schema schema=schema_manager.schemas[schema_index];
 	    if (!schema.fieldNameExists(field_name)) {
-	      System.err.print("setField ERROR: field name " + field_name + " not found"+"\n");
+	      System.err.print("setField ERROR: field nameList " + field_name + " not found"+"\n");
 	      return false;
 	    }
 	    int offset=schema.getFieldOffset(field_name);
 	    if (schema.getFieldType(offset)!=FieldType.STR20) {
-	      System.err.print("setField ERROR: field type not FieldType.STR20!"+"\n");
+	      System.err.print("setField ERROR: field typeList not FieldType.STR20!"+"\n");
 	      return false;
 	    } else {
 	      fields.get(offset).str=s;
@@ -133,16 +133,16 @@ public class Tuple implements Serializable {
 	    return true;
 	  }
 	
-	// returns false if the type is wrong or the name is not found
+	// returns false if the typeList is wrong or the nameList is not found
 	  public boolean setField(String field_name,int i){
 	    Schema schema=schema_manager.schemas[schema_index];
 	    if (!schema.fieldNameExists(field_name)) {
-	      System.err.print("setField ERROR: field name " + field_name + " not found"+"\n");
+	      System.err.print("setField ERROR: field nameList " + field_name + " not found"+"\n");
 	      return false;
 	    }
 	    int offset=schema.getFieldOffset(field_name);
 	    if (schema.getFieldType(offset)!=FieldType.INT) {
-	      System.err.print("setField ERROR: field type not FieldType.INT!"+"\n");
+	      System.err.print("setField ERROR: field typeList not FieldType.INT!"+"\n");
 	      return false;
 	    } else {
 	      fields.get(offset).integer=i;

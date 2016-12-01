@@ -3,7 +3,7 @@ package storageManager;
 import java.io.Serializable;
 
 /* A field can either by an integer or a string
- * the "type" variable indicates the field type
+ * the "typeList" variable indicates the field typeList
  * Usage: Fields are automatically setup when the schema is specified
  */
 

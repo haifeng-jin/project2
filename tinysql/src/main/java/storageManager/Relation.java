@@ -31,7 +31,7 @@ public class Relation implements Serializable {
 	  private Disk disk;
 	  private int schema_index; // points to the schema of the relation
 	  private MainMemory mem; // a pointer to the main memory
-	  private String relation_name; // name of the relation
+	  private String relation_name; // nameList of the relation
 
 	// For internal use only: DO NOT use constructors here. 
 	  // Create a relation through schema manager

@@ -8,14 +8,14 @@ public class Parser implements ParserConstants {
                         System.out.println(result);
         }
 
-  static final public Exp statement() throws ParseException {
+  final public Exp statement() throws ParseException {
                   Exp e;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case 15:
+    case 21:
       e = dropTableStatement();
                                   {if (true) return e;}
       break;
-    case 17:
+    case 23:
       e = createTableStatement();
                                     {if (true) return e;}
       break;
@@ -27,19 +27,112 @@ public class Parser implements ParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  static final public Exp dropTableStatement() throws ParseException {
-                           Token t;
-    jj_consume_token(15);
-    jj_consume_token(16);
+  final public AttributeList attributeName() throws ParseException {
+                                Token attributeName;
+    attributeName = jj_consume_token(name);
+        {if (true) return new AttributeList(attributeName.image);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public AttributeList attributeList() throws ParseException {
+                                AttributeList list1; AttributeList list2;
+    list1 = attributeName();
+    label_1:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case 17:
+        ;
+        break;
+      default:
+        jj_la1[1] = jj_gen;
+        break label_1;
+      }
+      jj_consume_token(17);
+      list2 = attributeName();
+                                                          list1 = new AttributeList(list1, list2);
+    }
+                {if (true) return list1;}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public ValueList getValue() throws ParseException {
+                       Token t;
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case literal:
+      t = jj_consume_token(literal);
+      break;
+    case integer:
+      t = jj_consume_token(integer);
+      break;
+    case null_value:
+      t = jj_consume_token(null_value);
+        {if (true) return new ValueList(t.image);}
+      break;
+    default:
+      jj_la1[2] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+    throw new Error("Missing return statement in function");
+  }
+
+  final public ValueList valueList() throws ParseException {
+                        ValueList list1; ValueList list2;
+    list1 = getValue();
+    label_2:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case 17:
+        ;
+        break;
+      default:
+        jj_la1[3] = jj_gen;
+        break label_2;
+      }
+      jj_consume_token(17);
+      list2 = getValue();
+                                                list1 = new ValueList(list1, list2);
+    }
+        {if (true) return list1;}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public InsertTuples insertTuples() throws ParseException {
+                              ValueList list;
+    jj_consume_token(18);
+    jj_consume_token(5);
+    list = valueList();
+    jj_consume_token(6);
+        {if (true) return new InsertTuples(list);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public Insert insertStatement() throws ParseException {
+                           Token tableName; AttributeList list; InsertTuples tuples;
+    jj_consume_token(19);
+    jj_consume_token(20);
+    tableName = jj_consume_token(name);
+    jj_consume_token(5);
+    list = attributeList();
+    jj_consume_token(6);
+    tuples = insertTuples();
+        {if (true) return new Insert(tableName.image, list, tuples);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public DropTable dropTableStatement() throws ParseException {
+                                 Token t;
+    jj_consume_token(21);
+    jj_consume_token(22);
     t = jj_consume_token(name);
                                  {if (true) return new DropTable(t.image);}
     throw new Error("Missing return statement in function");
   }
 
-  static final public Exp createTableStatement() throws ParseException {
-                             AttributeTypeList e; Token t;
-    jj_consume_token(17);
-    jj_consume_token(16);
+  final public CreateTable createTableStatement() throws ParseException {
+                                     AttributeTypeList e; Token t;
+    jj_consume_token(23);
+    jj_consume_token(22);
     t = jj_consume_token(name);
     jj_consume_token(5);
     e = attributeTypeList();
@@ -48,52 +141,51 @@ public class Parser implements ParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  static final public AttributeTypeList attributeTypeList() throws ParseException {
+  final public AttributeTypeList attributeTypeList() throws ParseException {
                                         AttributeTypeList list1; AttributeTypeList list2;
     list1 = attributeItem();
-    label_1:
+    label_3:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 18:
+      case 17:
         ;
         break;
       default:
-        jj_la1[1] = jj_gen;
-        break label_1;
+        jj_la1[4] = jj_gen;
+        break label_3;
       }
-      jj_consume_token(18);
+      jj_consume_token(17);
       list2 = attributeItem();
-                                                          list1 = new AttributeTypeList(list2.item, list1);
+            list1 = new AttributeTypeList(list1, list2);
     }
                 {if (true) return list1;}
     throw new Error("Missing return statement in function");
   }
 
-  static final public AttributeTypeList attributeItem() throws ParseException {
+  final public AttributeTypeList attributeItem() throws ParseException {
                                     Token t1; Token t2;
     t1 = jj_consume_token(name);
     t2 = jj_consume_token(data_type);
-                                   {if (true) return new AttributeTypeList(new AttributeItem(t1.image, t2.image), null);}
+                                   {if (true) return new AttributeTypeList(t1.image, t2.image);}
     throw new Error("Missing return statement in function");
   }
 
-  static private boolean jj_initialized_once = false;
   /** Generated Token Manager. */
-  static public ParserTokenManager token_source;
-  static SimpleCharStream jj_input_stream;
+  public ParserTokenManager token_source;
+  SimpleCharStream jj_input_stream;
   /** Current token. */
-  static public Token token;
+  public Token token;
   /** Next token. */
-  static public Token jj_nt;
-  static private int jj_ntk;
-  static private int jj_gen;
-  static final private int[] jj_la1 = new int[2];
+  public Token jj_nt;
+  private int jj_ntk;
+  private int jj_gen;
+  final private int[] jj_la1 = new int[5];
   static private int[] jj_la1_0;
   static {
       jj_la1_init_0();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x28000,0x40000,};
+      jj_la1_0 = new int[] {0xa00000,0x20000,0x11400,0x20000,0x20000,};
    }
 
   /** Constructor with InputStream. */
@@ -102,76 +194,55 @@ public class Parser implements ParserConstants {
   }
   /** Constructor with InputStream and supplied encoding */
   public Parser(java.io.InputStream stream, String encoding) {
-    if (jj_initialized_once) {
-      System.out.println("ERROR: Second call to constructor of static parser.  ");
-      System.out.println("       You must either use ReInit() or set the JavaCC option STATIC to false");
-      System.out.println("       during parser generation.");
-      throw new Error();
-    }
-    jj_initialized_once = true;
     try { jj_input_stream = new SimpleCharStream(stream, encoding, 1, 1); } catch(java.io.UnsupportedEncodingException e) { throw new RuntimeException(e); }
     token_source = new ParserTokenManager(jj_input_stream);
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 2; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
-  static public void ReInit(java.io.InputStream stream) {
+  public void ReInit(java.io.InputStream stream) {
      ReInit(stream, null);
   }
   /** Reinitialise. */
-  static public void ReInit(java.io.InputStream stream, String encoding) {
+  public void ReInit(java.io.InputStream stream, String encoding) {
     try { jj_input_stream.ReInit(stream, encoding, 1, 1); } catch(java.io.UnsupportedEncodingException e) { throw new RuntimeException(e); }
     token_source.ReInit(jj_input_stream);
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 2; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
   }
 
   /** Constructor. */
   public Parser(java.io.Reader stream) {
-    if (jj_initialized_once) {
-      System.out.println("ERROR: Second call to constructor of static parser. ");
-      System.out.println("       You must either use ReInit() or set the JavaCC option STATIC to false");
-      System.out.println("       during parser generation.");
-      throw new Error();
-    }
-    jj_initialized_once = true;
     jj_input_stream = new SimpleCharStream(stream, 1, 1);
     token_source = new ParserTokenManager(jj_input_stream);
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 2; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
-  static public void ReInit(java.io.Reader stream) {
+  public void ReInit(java.io.Reader stream) {
     jj_input_stream.ReInit(stream, 1, 1);
     token_source.ReInit(jj_input_stream);
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 2; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
   }
 
   /** Constructor with generated Token Manager. */
   public Parser(ParserTokenManager tm) {
-    if (jj_initialized_once) {
-      System.out.println("ERROR: Second call to constructor of static parser. ");
-      System.out.println("       You must either use ReInit() or set the JavaCC option STATIC to false");
-      System.out.println("       during parser generation.");
-      throw new Error();
-    }
-    jj_initialized_once = true;
     token_source = tm;
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 2; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
   }
 
   /** Reinitialise. */
@@ -180,10 +251,10 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 2; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
   }
 
-  static private Token jj_consume_token(int kind) throws ParseException {
+  private Token jj_consume_token(int kind) throws ParseException {
     Token oldToken;
     if ((oldToken = token).next != null) token = token.next;
     else token = token.next = token_source.getNextToken();
@@ -199,7 +270,7 @@ public class Parser implements ParserConstants {
 
 
 /** Get the next Token. */
-  static final public Token getNextToken() {
+  final public Token getNextToken() {
     if (token.next != null) token = token.next;
     else token = token.next = token_source.getNextToken();
     jj_ntk = -1;
@@ -208,7 +279,7 @@ public class Parser implements ParserConstants {
   }
 
 /** Get the specific Token. */
-  static final public Token getToken(int index) {
+  final public Token getToken(int index) {
     Token t = token;
     for (int i = 0; i < index; i++) {
       if (t.next != null) t = t.next;
@@ -217,26 +288,26 @@ public class Parser implements ParserConstants {
     return t;
   }
 
-  static private int jj_ntk() {
+  private int jj_ntk() {
     if ((jj_nt=token.next) == null)
       return (jj_ntk = (token.next=token_source.getNextToken()).kind);
     else
       return (jj_ntk = jj_nt.kind);
   }
 
-  static private java.util.List<int[]> jj_expentries = new java.util.ArrayList<int[]>();
-  static private int[] jj_expentry;
-  static private int jj_kind = -1;
+  private java.util.List<int[]> jj_expentries = new java.util.ArrayList<int[]>();
+  private int[] jj_expentry;
+  private int jj_kind = -1;
 
   /** Generate ParseException. */
-  static public ParseException generateParseException() {
+  public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[19];
+    boolean[] la1tokens = new boolean[24];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 2; i++) {
+    for (int i = 0; i < 5; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {
@@ -245,7 +316,7 @@ public class Parser implements ParserConstants {
         }
       }
     }
-    for (int i = 0; i < 19; i++) {
+    for (int i = 0; i < 24; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;
@@ -260,11 +331,11 @@ public class Parser implements ParserConstants {
   }
 
   /** Enable tracing. */
-  static final public void enable_tracing() {
+  final public void enable_tracing() {
   }
 
   /** Disable tracing. */
-  static final public void disable_tracing() {
+  final public void disable_tracing() {
   }
 
 }

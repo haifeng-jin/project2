@@ -28,7 +28,7 @@ public class Function {
         Schema schema=new Schema(DataNames,field_types);
         System.out.println("Creating table " + TableName);
         Relation relation_reference=schema_manager.createRelation(TableName,schema);
-        System.out.print("The table has name " + relation_reference.getRelationName() + "\n");
+        System.out.print("The table has nameList " + relation_reference.getRelationName() + "\n");
         System.out.print("The table has schema:" + "\n");
         System.out.print(relation_reference.getSchema() + "\n");
         System.out.print("The table currently have " + relation_reference.getNumOfBlocks() + " blocks" + "\n");
@@ -36,7 +36,7 @@ public class Function {
         System.out.flush();
     }
 
-    private void dropTable(String TableName)
+    public void dropTable(String TableName)
     {
         System.out.println("Deleting Table "+TableName);
         schema_manager.deleteRelation(TableName);
@@ -91,7 +91,7 @@ public class Function {
         for (int memory_block_index = 0; memory_block_index < Config.NUM_OF_BLOCKS_IN_MEMORY; ++memory_block_index)
             if (!mem.getBlock(memory_block_index).isEmpty())relation_reference.setBlock(relation_reference.getNumOfBlocks(), memory_block_index);
     }
-    private void insertIntoTableNtimes(String TableName,ArrayList<ArrayList<String>>DataName,ArrayList<ArrayList<String>>DataValues)
+    public void insertIntoTableNtimes(String TableName,ArrayList<ArrayList<String>>DataName,ArrayList<ArrayList<String>>DataValues)
     {
         Relation relation_reference=schema_manager.getRelation(TableName);
         int capacity=relation_reference.getSchema().getTuplesPerBlock()*Config.NUM_OF_BLOCKS_IN_MEMORY;

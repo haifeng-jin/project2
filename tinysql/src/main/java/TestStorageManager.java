@@ -83,9 +83,9 @@ public class TestStorageManager {
         field_types=schema.getFieldTypes();
         System.out.print(field_types.toString()+"\n");
         System.out.print("\n");
-        System.out.print("The first field is of name " + schema.getFieldName(0) + "\n");
-        System.out.print("The second field is of type " + (schema.getFieldType(1)) + "\n");
-        System.out.print("The field f3 is of type " + (schema.getFieldType("f3")) + "\n");
+        System.out.print("The first field is of nameList " + schema.getFieldName(0) + "\n");
+        System.out.print("The second field is of typeList " + (schema.getFieldType(1)) + "\n");
+        System.out.print("The field f3 is of typeList " + (schema.getFieldType("f3")) + "\n");
         System.out.print("The field f4 is at offset " + schema.getFieldOffset("f4") + "\n" + "\n");
 
         System.out.flush();
@@ -96,17 +96,17 @@ public class TestStorageManager {
         schema.getFieldName(schema.getNumOfFields()); // out of bound
         schema.getFieldType(-1); // out of bound
         schema.getFieldType(schema.getNumOfFields()); // out of bound
-        schema.getFieldType("test"); // field name does not exist
-        schema.getFieldOffset("test"); // field name does not exist
+        schema.getFieldType("test"); // field nameList does not exist
+        schema.getFieldOffset("test"); // field nameList does not exist
 
-        field_names.add("f4"); // same field name
+        field_names.add("f4"); // same field nameList
         field_types.add(FieldType.STR20);
         Schema schema_error=new Schema(field_names,field_types);
 
-        field_names.set(4,""); // empty field name
+        field_names.set(4,""); // empty field nameList
         Schema schema_error2=new Schema(field_names,field_types);
 
-        field_names.set(4,"f5"); // corrects field name
+        field_names.set(4,"f5"); // corrects field nameList
         field_names.add("f6");
         field_names.add("f7");
         field_names.add("f8");
@@ -140,7 +140,7 @@ public class TestStorageManager {
         Relation relation_reference=schema_manager.createRelation(relation_name,schema);
 
         // Print the information about the Relation
-        System.out.print("The table has name " + relation_reference.getRelationName() + "\n");
+        System.out.print("The table has nameList " + relation_reference.getRelationName() + "\n");
         System.out.print("The table has schema:" + "\n");
         System.out.print(relation_reference.getSchema() + "\n");
         System.out.print("The table currently have " + relation_reference.getNumOfBlocks() + " blocks" + "\n");
@@ -150,7 +150,7 @@ public class TestStorageManager {
 
         // Error testing
         System.out.print("Error testing: " + "\n");
-        schema_manager.createRelation(relation_name,schema); // create a relation with the same name
+        schema_manager.createRelation(relation_name,schema); // create a relation with the same nameList
         schema_manager.createRelation("test",new Schema()); // create a relation with empty schema
         System.out.print("\n");
 
@@ -194,7 +194,7 @@ public class TestStorageManager {
         //Error testing
         System.out.print("Error testing: " + "\n");
         System.out.print("The table ExampleTable2 exists: " + (schema_manager.relationExists("ExampleTable2")?"TRUE":"FALSE") + "\n");
-        schema_manager.createRelation("",schema); // empty relation name
+        schema_manager.createRelation("",schema); // empty relation nameList
         schema_manager.getSchema("ExampleTable2"); // relation does not exist
         schema_manager.getRelation("ExampleTable2"); // relation does not exist
         schema_manager.deleteRelation("ExampleTable2"); // relation does not exist
@@ -246,10 +246,10 @@ public class TestStorageManager {
 
         //Error testing
         System.out.print("Error testing: " + "\n");
-        tuple.setField(0,11); // wrong type of value
+        tuple.setField(0,11); // wrong typeList of value
         tuple.setField(-1,"v11"); // out of bound
         tuple.setField(tuple.getNumOfFields(),"v11"); // out of bound
-        tuple.setField("f2","v21"); // wrong type of value
+        tuple.setField("f2","v21"); // wrong typeList of value
         tuple.setField("f5",21); // field does not exist
         tuple.getField(-1); // out of bound
         tuple.getField(tuple.getNumOfFields()); // out of bound

@@ -3,18 +3,18 @@ package storageManager;
 import java.io.Serializable;
 import java.util.TreeMap;
 
-/* A schema manager maps a relation name to a relation and 
+/* A schema manager maps a relation nameList to a relation and
  * 	a corresponding schema. 
  * You will always create a relation through schema manager 
- * by specifying a relation name and a schema.
+ * by specifying a relation nameList and a schema.
  * You will also get access to relations and schemas from here.
  * Usage: At the beginning of your program, you need to initialize a 
  * 			schema manager.
  *        Initialize the schema manager by supplying the references 
  *        	to memory and to disk
  *        Create a relation through here (and not elsewhere) by giving 
- *        	relation name and schema
- *        Every relation name must be unique.
+ *        	relation nameList and schema
+ *        Every relation nameList must be unique.
  *        Once a relation is created, the schema cannot be changed
  */
 
@@ -58,11 +58,11 @@ public class SchemaManager implements Serializable {
 	  }
 
 	// returns a reference to the newly allocated relation; 
-	// the relation name must not exist already
+	// the relation nameList must not exist already
 	  public Relation createRelation(String relation_name, 
 			  Schema schema){
 	    if (relation_name=="") {
-	      System.err.print("createRelation ERROR: empty relation name"
+	      System.err.print("createRelation ERROR: empty relation nameList"
 	    		  + "\n");
 	      return null;
 	    }

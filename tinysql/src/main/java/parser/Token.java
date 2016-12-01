@@ -112,7 +112,7 @@ public class Token implements java.io.Serializable {
    *    case MyParserConstants.ID : return new IDToken(ofKind, image);
    *
    * to the following switch statement. Then you can cast matchedToken
-   * variable to the appropriate type and use sit in your lexical actions.
+   * variable to the appropriate typeList and use sit in your lexical actions.
    */
   public static Token newToken(int ofKind, String image)
   {

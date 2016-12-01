@@ -13,15 +13,19 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int digit = 9;
   /** RegularExpression Id. */
-  int letter = 10;
+  int null_value = 10;
   /** RegularExpression Id. */
-  int integer = 11;
+  int letter = 11;
   /** RegularExpression Id. */
-  int data_type = 12;
+  int integer = 12;
   /** RegularExpression Id. */
-  int name = 13;
+  int data_type = 13;
   /** RegularExpression Id. */
-  int column_name = 14;
+  int name = 14;
+  /** RegularExpression Id. */
+  int column_name = 15;
+  /** RegularExpression Id. */
+  int literal = 16;
 
   /** Lexical state. */
   int DEFAULT = 0;
@@ -38,15 +42,20 @@ public interface ParserConstants {
     "\"+\"",
     "\"*\"",
     "<digit>",
+    "\"NULL\"",
     "<letter>",
     "<integer>",
     "<data_type>",
-    "<name>",
+    "<nameList>",
     "<column_name>",
+    "<literal>",
+    "\",\"",
+    "\"VALUE\"",
+    "\"INSERT\"",
+    "\"INTO\"",
     "\"DROP\"",
     "\"TABLE\"",
     "\"CREATE\"",
-    "\",\"",
   };
 
 }

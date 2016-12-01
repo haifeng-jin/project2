@@ -1,3 +1,7 @@
+options {
+    STATIC = false;
+}
+
 PARSER_BEGIN(Parser)
 package parser;
 
@@ -14,11 +18,13 @@ PARSER_END(Parser)
 SKIP:  { " " | "\t" | "\n" | "\r" }
 TOKEN: { "(" | ")" | "+" | "*" |
 	       <digit: ["0"-"9"]> |
+	       <null_value: "NULL"> |
 		       <letter: ["a"-"z"]> |
 		       <integer: (<digit>)+> |
 			<data_type: "INT"|"STR20"> |
-		       <name: <letter>(<digit>|<letter>)*> |
-		       <column_name: (<name>".")<name> >
+		       <nameList: <letter>(<digit>|<letter>)*> |
+		       <column_name: (<nameList>".")<nameList> > |
+		       <literal: "\""(~["\""])+"\"" >
        }
 
 Exp statement(): {Exp e;}
@@ -27,24 +33,71 @@ Exp statement(): {Exp e;}
 	e = createTableStatement() {return e;}
 }
 
-Exp dropTableStatement(): {Token t;}
+AttributeList attributeName(): {Token attributeName;}
 {
-	"DROP" "TABLE" t=<name> {return new DropTable(t.image);}
+    attributeName=<nameList> {
+        return new AttributeList(attributeName.image);
+    }
 }
 
-Exp createTableStatement(): {AttributeTypeList e; Token t;}
+AttributeList attributeList(): {AttributeList list1; AttributeList list2; }
 {
-	"CREATE" "TABLE" t=<name> "(" e=attributeTypeList() ")" {return new CreateTable(t.image, e);}
+	list1=attributeName() ("," list2=attributeName() {list1 = new AttributeList(list1, list2);})* {
+		return list1;
+	}
 }
 
-AttributeTypeList attributeTypeList(): {AttributeTypeList list1; AttributeTypeList list2;}
+ValueList getValue(): {Token t; }
 {
-	list1=attributeItem() ("," list2=attributeItem() {list1 = new AttributeTypeList(list2.item, list1);})* {
+    t = <literal> | t=<integer> | t=<null_value>
+    {
+        return new ValueList(t.image);
+    }
+}
+
+ValueList valueList(): {ValueList list1; ValueList list2;}
+{
+	list1=getValue() ("," list2=getValue() {list1 = new ValueList(list1, list2);})* {
+        return list1;
+    }
+}
+
+InsertTuples insertTuples(): {ValueList list; }
+{
+    "VALUE" "(" list = valueList() ")"
+    {
+        return new InsertTuples(list);
+    }
+}
+
+Insert insertStatement(): {Token tableName; AttributeList list; InsertTuples tuples; }
+{
+    "INSERT" "INTO" tableName = <nameList> "(" list = attributeList() ")" tuples = insertTuples()
+    {
+        return new Insert(tableName.image, list, tuples);
+    }
+}
+
+DropTable dropTableStatement(): {Token t;}
+{
+	"DROP" "TABLE" t=<nameList> {return new DropTable(t.image);}
+}
+
+CreateTable createTableStatement(): {AttributeTypeList e; Token t;}
+{
+	"CREATE" "TABLE" t=<nameList> "(" e=list() ")" {return new CreateTable(t.image, e);}
+}
+
+AttributeTypeList list(): {AttributeTypeList list1; AttributeTypeList list2;}
+{
+	list1=attributeItem() ("," list2=attributeItem() {
+	    list1 = new AttributeTypeList(list1, list2);
+	})* {
 		return list1;
 	}
 }
 
 AttributeTypeList attributeItem(): {Token t1; Token t2;} {
-	t1=<name> t2=<data_type> { return new AttributeTypeList(new AttributeItem(t1.image, t2.image), null);}
+	t1=<nameList> t2=<data_type> { return new AttributeTypeList(t1.image, t2.image);}
 }
 

@@ -21,7 +21,7 @@ import java.util.Map.Entry;
  *          object first.
  *        Create a schema by giving field names and field types. 
  *          (Refer to "Field.h")
- *        Every field name must be unique and non-empty.
+ *        Every field nameList must be unique and non-empty.
  *        Then create a relation through the SchemaManager 
  *          using the created schema.
  */
@@ -29,7 +29,7 @@ import java.util.Map.Entry;
 public class Schema implements Serializable {
 	  private ArrayList<String> field_names;
 	  private ArrayList<FieldType> field_types;
-	  private TreeMap<String,Integer> field_offsets; // Maps a field name to a field offset.
+	  private TreeMap<String,Integer> field_offsets; // Maps a field nameList to a field offset.
 
 	  public Schema() {
 		    field_names=new ArrayList<String>();
@@ -72,7 +72,7 @@ public class Schema implements Serializable {
 	    }
 	    for (int i=0;i<field_names.size()-1;i++) {
 	      if (field_names.get(i).equals("")) {
-	        System.err.print("Schema ERROR: empty field name at offset " + i + "\n");
+	        System.err.print("Schema ERROR: empty field nameList at offset " + i + "\n");
 	        return;
 	      }
 	      for (int j=i+1;j<field_names.size();j++) {
@@ -84,7 +84,7 @@ public class Schema implements Serializable {
 	      }
 	    }
 	    if (field_names.get(field_names.size()-1).equals("")) {
-	      System.err.print("Schema ERROR: empty field name at offset " + (field_names.size()-1) + "\n");
+	      System.err.print("Schema ERROR: empty field nameList at offset " + (field_names.size()-1) + "\n");
 	      return;
 	    }
 	    //this.field_names = (ArrayList<String>) DeepCopy.copy(field_names);
@@ -137,7 +137,7 @@ public class Schema implements Serializable {
 	    return field_types;
 	  }
 
-	  //returns the field name at the offset
+	  //returns the field nameList at the offset
 	//return empty String if the offset is out of bound
 	  public String getFieldName(int offset)  {
 	    if (offset<0 || offset>=getNumOfFields()) {
@@ -147,7 +147,7 @@ public class Schema implements Serializable {
 	    return field_names.get(offset);
 	  }
 
-	  //returns the field type at the offset
+	  //returns the field typeList at the offset
 	//return null if the offset is out of bound
 	  public FieldType getFieldType(int offset)  {
 	    if (offset<0 || offset>=getNumOfFields()) {
@@ -157,20 +157,20 @@ public class Schema implements Serializable {
 	    return field_types.get(offset);
 	  }
 
-	  //returns the field type corresponding to the field name
+	  //returns the field typeList corresponding to the field nameList
 	//return null if the offset is out of bound
 	  public FieldType getFieldType(String field_name)  {
 	    if (!field_offsets.containsKey(field_name)) {
-	      System.err.print("getFieldOffset ERROR: field name "+field_name+" is not found"+"\n");
+	      System.err.print("getFieldOffset ERROR: field nameList "+field_name+" is not found"+"\n");
 	      return null;
 	    }
 	    return field_types.get(field_offsets.get(field_name));
 	  }
 
-	//return -1 if the field name does not exist
+	//return -1 if the field nameList does not exist
 	  public int getFieldOffset(String field_name)  {
 	    if (!field_offsets.containsKey(field_name)) {
-	      System.err.print("getFieldOffset ERROR: field name "+field_name+" is not found"+"\n");
+	      System.err.print("getFieldOffset ERROR: field nameList "+field_name+" is not found"+"\n");
 	      return -1;
 	    }
 	    return field_offsets.get(field_name);
