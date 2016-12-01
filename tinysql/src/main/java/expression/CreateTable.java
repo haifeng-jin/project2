@@ -2,7 +2,7 @@ package expression;
 
 import function.Function;
 
-public class CreateTable extends Exp{
+public class CreateTable extends Statement {
     String tableName;
     public AttributeTypeList list;
 

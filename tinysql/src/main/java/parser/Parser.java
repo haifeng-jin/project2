@@ -4,12 +4,12 @@ package parser;
 import expression.*;
 public class Parser implements ParserConstants {
         public static void main(String[] args) throws Exception {
-                        Exp result = new Parser(new java.io.StringReader(args[0])).statement();
+                        Statement result = new Parser(new java.io.StringReader(args[0])).statement();
                         System.out.println(result);
         }
 
-  final public Exp statement() throws ParseException {
-                  Exp e;
+  final public Statement statement() throws ParseException {
+                        Statement e;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case 21:
       e = dropTableStatement();

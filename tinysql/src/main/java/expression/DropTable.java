@@ -3,7 +3,7 @@ package expression;
 
 import function.Function;
 
-public class DropTable extends Exp{
+public class DropTable extends Statement {
     String tableName;
 
     public DropTable(String tableName) {

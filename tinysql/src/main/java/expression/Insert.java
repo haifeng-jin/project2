@@ -4,7 +4,7 @@ import function.Function;
 
 import java.util.ArrayList;
 
-public class Insert extends Exp{
+public class Insert extends Statement {
     String tableName;
     AttributeList list;
     InsertTuples tuples;

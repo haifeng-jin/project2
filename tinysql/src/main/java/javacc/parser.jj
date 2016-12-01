@@ -8,7 +8,7 @@ package parser;
 import expression.*;
 public class Parser {
 	public static void main(String[] args) throws Exception {
-			Exp result = new Parser(new java.io.StringReader(args[0])).statement();
+			Statement result = new Parser(new java.io.StringReader(args[0])).statement();
 			System.out.println(result);
 	}
 }
@@ -27,7 +27,7 @@ TOKEN: { "(" | ")" | "+" | "*" |
 		       <literal: "\""(~["\""])+"\"" >
        }
 
-Exp statement(): {Exp e;}
+Statement statement(): {Statement e;}
 {
 	e = dropTableStatement() {return e;} |
 	e = createTableStatement() {return e;}
