@@ -20,11 +20,12 @@ TOKEN: { "(" | ")" | "+" | "*" |
 		       <integer: (<digit>)+> |
 	       <digit: ["0"-"9"]> |
 	       <null_value: "NULL"> |
-		       <letter: ["a"-"z"]> |
 			<data_type: "INT"|"STR20"> |
-		       <name: <letter>(<digit>|<letter>)*> |
 		       <column_name: (<name>".")<name> > |
-		       <literal: "\""(~["\""])+"\"" >
+		       <name: <letter>(<digit>|<letter>)*> |
+		       <letter: ["a"-"z"]> |
+		       <literal: "\""(~["\""])+"\"" > |
+		       <comp: "<" | ">" | "=">
        }
 
 Statement statement(): {Statement e;}
@@ -109,3 +110,47 @@ AttributeTypeList attributeItem(): {Token t1; Token t2;} {
 	t1=<name> t2=<data_type> { return new AttributeTypeList(t1.image, t2.image);}
 }
 
+SearchCondition searchCondition(): {SearchCondition condition1; SearchCondition condition2; }
+{
+    condition1 = booleanTerm() ("OR" condition2 = booleanTerm() {
+        condition1 = new SearchCondition(condition1, condition2);
+    })* {
+        return condition1;
+    }
+}
+
+SearchCondition booleanTerm(): {BooleanTerm term1; BooleanTerm term2;} {
+    term1 = booleanFactor() ("AND" term2 = booleanFactor() {
+        term1 = new BooleanTerm(term1, term2);
+    })* {
+        return new SearchCondition(term1);
+    }
+}
+
+BooleanTerm booleanFactor(): {Expression exp1; Expression exp2; Token t;} {
+    exp1 = expression() t=<comp> exp2 = expression() {
+        return new BooleanTerm(new BooleanFactor(exp1, t.image, exp2));
+    }
+}
+
+Expression expression(): {String term1; String term2;} {
+    term1 = term() {
+        return new Expression(term1);
+    } | LOOKAHEAD(3) "(" term1 = term() "+" term2=term() ")" {
+        return new Expression(term1, "+", term2);
+    } | LOOKAHEAD(3) "(" term1 = term() "-" term2=term() ")" {
+        return new Expression(term1, "-", term2);
+    } | "(" term1 = term() "*" term2=term() ")" {
+        return new Expression(term1, "*", term2);
+    }
+}
+
+String term(): {Token t;} {
+    t = <column_name> {
+        return t.image;
+    } | t = <literal> {
+        return t.image;
+    } | t = <integer> {
+        return t.image;
+    }
+}

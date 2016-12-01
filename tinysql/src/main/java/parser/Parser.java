@@ -11,11 +11,11 @@ public class Parser implements ParserConstants {
   final public Statement statement() throws ParseException {
                         Statement e;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case 21:
+    case 22:
       e = dropTableStatement();
                                   {if (true) return e;}
       break;
-    case 23:
+    case 24:
       e = createTableStatement();
                                     {if (true) return e;}
       break;
@@ -40,14 +40,14 @@ public class Parser implements ParserConstants {
     label_1:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 17:
+      case 18:
         ;
         break;
       default:
         jj_la1[1] = jj_gen;
         break label_1;
       }
-      jj_consume_token(17);
+      jj_consume_token(18);
       list2 = attributeName();
                                                           list1 = new AttributeList(list1, list2);
     }
@@ -86,14 +86,14 @@ public class Parser implements ParserConstants {
     label_2:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 17:
+      case 18:
         ;
         break;
       default:
         jj_la1[3] = jj_gen;
         break label_2;
       }
-      jj_consume_token(17);
+      jj_consume_token(18);
       list2 = getValue();
                                                 list1 = new ValueList(list1, list2);
     }
@@ -103,7 +103,7 @@ public class Parser implements ParserConstants {
 
   final public InsertTuples insertTuples() throws ParseException {
                               ValueList list;
-    jj_consume_token(18);
+    jj_consume_token(19);
     jj_consume_token(5);
     list = valueList();
     jj_consume_token(6);
@@ -113,8 +113,8 @@ public class Parser implements ParserConstants {
 
   final public Insert insertStatement() throws ParseException {
                            Token tableName; AttributeList list; InsertTuples tuples;
-    jj_consume_token(19);
     jj_consume_token(20);
+    jj_consume_token(21);
     tableName = jj_consume_token(name);
     jj_consume_token(5);
     list = attributeList();
@@ -126,8 +126,8 @@ public class Parser implements ParserConstants {
 
   final public DropTable dropTableStatement() throws ParseException {
                                  Token t;
-    jj_consume_token(21);
     jj_consume_token(22);
+    jj_consume_token(23);
     t = jj_consume_token(name);
                                  {if (true) return new DropTable(t.image);}
     throw new Error("Missing return statement in function");
@@ -135,8 +135,8 @@ public class Parser implements ParserConstants {
 
   final public CreateTable createTableStatement() throws ParseException {
                                      AttributeTypeList e; Token t;
+    jj_consume_token(24);
     jj_consume_token(23);
-    jj_consume_token(22);
     t = jj_consume_token(name);
     jj_consume_token(5);
     e = attributeTypeList();
@@ -151,14 +151,14 @@ public class Parser implements ParserConstants {
     label_3:
     while (true) {
       switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case 17:
+      case 18:
         ;
         break;
       default:
         jj_la1[4] = jj_gen;
         break label_3;
       }
-      jj_consume_token(17);
+      jj_consume_token(18);
       list2 = attributeItem();
             list1 = new AttributeTypeList(list1, list2);
     }
@@ -174,6 +174,181 @@ public class Parser implements ParserConstants {
     throw new Error("Missing return statement in function");
   }
 
+  final public SearchCondition searchCondition() throws ParseException {
+                                    SearchCondition condition1; SearchCondition condition2;
+    condition1 = booleanTerm();
+    label_4:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case 25:
+        ;
+        break;
+      default:
+        jj_la1[5] = jj_gen;
+        break label_4;
+      }
+      jj_consume_token(25);
+      condition2 = booleanTerm();
+        condition1 = new SearchCondition(condition1, condition2);
+    }
+        {if (true) return condition1;}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public SearchCondition booleanTerm() throws ParseException {
+                                BooleanTerm term1; BooleanTerm term2;
+    term1 = booleanFactor();
+    label_5:
+    while (true) {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case 26:
+        ;
+        break;
+      default:
+        jj_la1[6] = jj_gen;
+        break label_5;
+      }
+      jj_consume_token(26);
+      term2 = booleanFactor();
+        term1 = new BooleanTerm(term1, term2);
+    }
+        {if (true) return new SearchCondition(term1);}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public BooleanTerm booleanFactor() throws ParseException {
+                              Expression exp1; Expression exp2; Token t;
+    exp1 = expression();
+    t = jj_consume_token(comp);
+    exp2 = expression();
+        {if (true) return new BooleanTerm(new BooleanFactor(exp1, t.image, exp2));}
+    throw new Error("Missing return statement in function");
+  }
+
+  final public Expression expression() throws ParseException {
+                          String term1; String term2;
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case integer:
+    case column_name:
+    case literal:
+      term1 = term();
+        {if (true) return new Expression(term1);}
+      break;
+    default:
+      jj_la1[7] = jj_gen;
+      if (jj_2_1(3)) {
+        jj_consume_token(5);
+        term1 = term();
+        jj_consume_token(7);
+        term2 = term();
+        jj_consume_token(6);
+        {if (true) return new Expression(term1, "+", term2);}
+      } else if (jj_2_2(3)) {
+        jj_consume_token(5);
+        term1 = term();
+        jj_consume_token(27);
+        term2 = term();
+        jj_consume_token(6);
+        {if (true) return new Expression(term1, "-", term2);}
+      } else {
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case 5:
+          jj_consume_token(5);
+          term1 = term();
+          jj_consume_token(8);
+          term2 = term();
+          jj_consume_token(6);
+        {if (true) return new Expression(term1, "*", term2);}
+          break;
+        default:
+          jj_la1[8] = jj_gen;
+          jj_consume_token(-1);
+          throw new ParseException();
+        }
+      }
+    }
+    throw new Error("Missing return statement in function");
+  }
+
+  final public String term() throws ParseException {
+                Token t;
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case column_name:
+      t = jj_consume_token(column_name);
+        {if (true) return t.image;}
+      break;
+    case literal:
+      t = jj_consume_token(literal);
+        {if (true) return t.image;}
+      break;
+    case integer:
+      t = jj_consume_token(integer);
+        {if (true) return t.image;}
+      break;
+    default:
+      jj_la1[9] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+    throw new Error("Missing return statement in function");
+  }
+
+  private boolean jj_2_1(int xla) {
+    jj_la = xla; jj_lastpos = jj_scanpos = token;
+    try { return !jj_3_1(); }
+    catch(LookaheadSuccess ls) { return true; }
+    finally { jj_save(0, xla); }
+  }
+
+  private boolean jj_2_2(int xla) {
+    jj_la = xla; jj_lastpos = jj_scanpos = token;
+    try { return !jj_3_2(); }
+    catch(LookaheadSuccess ls) { return true; }
+    finally { jj_save(1, xla); }
+  }
+
+  private boolean jj_3R_9() {
+    if (jj_scan_token(integer)) return true;
+    return false;
+  }
+
+  private boolean jj_3_2() {
+    if (jj_scan_token(5)) return true;
+    if (jj_3R_6()) return true;
+    if (jj_scan_token(27)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_8() {
+    if (jj_scan_token(literal)) return true;
+    return false;
+  }
+
+  private boolean jj_3_1() {
+    if (jj_scan_token(5)) return true;
+    if (jj_3R_6()) return true;
+    if (jj_scan_token(7)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_7() {
+    if (jj_scan_token(column_name)) return true;
+    return false;
+  }
+
+  private boolean jj_3R_6() {
+    Token xsp;
+    xsp = jj_scanpos;
+    if (jj_3R_7()) {
+    jj_scanpos = xsp;
+    if (jj_3R_8()) {
+    jj_scanpos = xsp;
+    if (jj_3R_9()) return true;
+    }
+    }
+    return false;
+  }
+
   /** Generated Token Manager. */
   public ParserTokenManager token_source;
   SimpleCharStream jj_input_stream;
@@ -182,15 +357,20 @@ public class Parser implements ParserConstants {
   /** Next token. */
   public Token jj_nt;
   private int jj_ntk;
+  private Token jj_scanpos, jj_lastpos;
+  private int jj_la;
   private int jj_gen;
-  final private int[] jj_la1 = new int[5];
+  final private int[] jj_la1 = new int[10];
   static private int[] jj_la1_0;
   static {
       jj_la1_init_0();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0xa00000,0x20000,0x10a00,0x20000,0x20000,};
+      jj_la1_0 = new int[] {0x1400000,0x40000,0x10a00,0x40000,0x40000,0x2000000,0x4000000,0x12200,0x20,0x12200,};
    }
+  final private JJCalls[] jj_2_rtns = new JJCalls[2];
+  private boolean jj_rescan = false;
+  private int jj_gc = 0;
 
   /** Constructor with InputStream. */
   public Parser(java.io.InputStream stream) {
@@ -203,7 +383,8 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 10; i++) jj_la1[i] = -1;
+    for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
   /** Reinitialise. */
@@ -217,7 +398,8 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 10; i++) jj_la1[i] = -1;
+    for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
   /** Constructor. */
@@ -227,7 +409,8 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 10; i++) jj_la1[i] = -1;
+    for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
   /** Reinitialise. */
@@ -237,7 +420,8 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 10; i++) jj_la1[i] = -1;
+    for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
   /** Constructor with generated Token Manager. */
@@ -246,7 +430,8 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 10; i++) jj_la1[i] = -1;
+    for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
   /** Reinitialise. */
@@ -255,7 +440,8 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 5; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 10; i++) jj_la1[i] = -1;
+    for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
   private Token jj_consume_token(int kind) throws ParseException {
@@ -265,11 +451,44 @@ public class Parser implements ParserConstants {
     jj_ntk = -1;
     if (token.kind == kind) {
       jj_gen++;
+      if (++jj_gc > 100) {
+        jj_gc = 0;
+        for (int i = 0; i < jj_2_rtns.length; i++) {
+          JJCalls c = jj_2_rtns[i];
+          while (c != null) {
+            if (c.gen < jj_gen) c.first = null;
+            c = c.next;
+          }
+        }
+      }
       return token;
     }
     token = oldToken;
     jj_kind = kind;
     throw generateParseException();
+  }
+
+  static private final class LookaheadSuccess extends java.lang.Error { }
+  final private LookaheadSuccess jj_ls = new LookaheadSuccess();
+  private boolean jj_scan_token(int kind) {
+    if (jj_scanpos == jj_lastpos) {
+      jj_la--;
+      if (jj_scanpos.next == null) {
+        jj_lastpos = jj_scanpos = jj_scanpos.next = token_source.getNextToken();
+      } else {
+        jj_lastpos = jj_scanpos = jj_scanpos.next;
+      }
+    } else {
+      jj_scanpos = jj_scanpos.next;
+    }
+    if (jj_rescan) {
+      int i = 0; Token tok = token;
+      while (tok != null && tok != jj_scanpos) { i++; tok = tok.next; }
+      if (tok != null) jj_add_error_token(kind, i);
+    }
+    if (jj_scanpos.kind != kind) return true;
+    if (jj_la == 0 && jj_scanpos == jj_lastpos) throw jj_ls;
+    return false;
   }
 
 
@@ -302,16 +521,46 @@ public class Parser implements ParserConstants {
   private java.util.List<int[]> jj_expentries = new java.util.ArrayList<int[]>();
   private int[] jj_expentry;
   private int jj_kind = -1;
+  private int[] jj_lasttokens = new int[100];
+  private int jj_endpos;
+
+  private void jj_add_error_token(int kind, int pos) {
+    if (pos >= 100) return;
+    if (pos == jj_endpos + 1) {
+      jj_lasttokens[jj_endpos++] = kind;
+    } else if (jj_endpos != 0) {
+      jj_expentry = new int[jj_endpos];
+      for (int i = 0; i < jj_endpos; i++) {
+        jj_expentry[i] = jj_lasttokens[i];
+      }
+      boolean exists = false;
+      for (java.util.Iterator<?> it = jj_expentries.iterator(); it.hasNext();) {
+        exists = true;
+        int[] oldentry = (int[])(it.next());
+        if (oldentry.length == jj_expentry.length) {
+          for (int i = 0; i < jj_expentry.length; i++) {
+            if (oldentry[i] != jj_expentry[i]) {
+              exists = false;
+              break;
+            }
+          }
+          if (exists) break;
+        }
+      }
+      if (!exists) jj_expentries.add(jj_expentry);
+      if (pos != 0) jj_lasttokens[(jj_endpos = pos) - 1] = kind;
+    }
+  }
 
   /** Generate ParseException. */
   public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[24];
+    boolean[] la1tokens = new boolean[28];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 5; i++) {
+    for (int i = 0; i < 10; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {
@@ -320,13 +569,16 @@ public class Parser implements ParserConstants {
         }
       }
     }
-    for (int i = 0; i < 24; i++) {
+    for (int i = 0; i < 28; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;
         jj_expentries.add(jj_expentry);
       }
     }
+    jj_endpos = 0;
+    jj_rescan_token();
+    jj_add_error_token(0, 0);
     int[][] exptokseq = new int[jj_expentries.size()][];
     for (int i = 0; i < jj_expentries.size(); i++) {
       exptokseq[i] = jj_expentries.get(i);
@@ -340,6 +592,42 @@ public class Parser implements ParserConstants {
 
   /** Disable tracing. */
   final public void disable_tracing() {
+  }
+
+  private void jj_rescan_token() {
+    jj_rescan = true;
+    for (int i = 0; i < 2; i++) {
+    try {
+      JJCalls p = jj_2_rtns[i];
+      do {
+        if (p.gen > jj_gen) {
+          jj_la = p.arg; jj_lastpos = jj_scanpos = p.first;
+          switch (i) {
+            case 0: jj_3_1(); break;
+            case 1: jj_3_2(); break;
+          }
+        }
+        p = p.next;
+      } while (p != null);
+      } catch(LookaheadSuccess ls) { }
+    }
+    jj_rescan = false;
+  }
+
+  private void jj_save(int index, int xla) {
+    JJCalls p = jj_2_rtns[index];
+    while (p.gen > jj_gen) {
+      if (p.next == null) { p = p.next = new JJCalls(); break; }
+      p = p.next;
+    }
+    p.gen = jj_gen + xla - jj_la; p.first = token; p.arg = xla;
+  }
+
+  static final class JJCalls {
+    int gen;
+    Token first;
+    int arg;
+    JJCalls next;
   }
 
 }
