@@ -1,6 +1,5 @@
 package expression;
 
-import function.Function;
 import org.junit.Test;
 import parser.ParseException;
 import parser.Parser;

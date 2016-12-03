@@ -68,6 +68,7 @@ public interface ParserConstants {
     "\"WHERE\"",
     "\"ORDER\"",
     "\"BY\"",
+    "\"DELETE\"",
   };
 
 }

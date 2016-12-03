@@ -30,6 +30,9 @@ TOKEN: { "(" | ")" | "+" | "*" |
 
 Statement statement(): {Statement e;}
 {
+	e = delete() {return e;} |
+	e = insertStatement() {return e;} |
+	e = select() {return e;} |
 	e = dropTableStatement() {return e;} |
 	e = createTableStatement() {return e;}
 }
@@ -158,7 +161,7 @@ String term(): {Token t;} {
 }
 
 Select select(): {SelectList columnList; TableList tableList; boolean distinct; SearchCondition condition; Token t; } {
-    "SELECT" {distinct = false; condition = null; t=new Token();} ("DISTINCT" { distinct = true; })? columnList = selectList() "FROM" tableList = tableList()
+    "SELECT" {distinct = false; condition = new SearchCondition(); t=new Token();} ("DISTINCT" { distinct = true; })? columnList = selectList() "FROM" tableList = tableList()
     ("WHERE" condition = searchCondition())? ("ORDER" "BY" t=<name> | t=<column_name> )? {
         return new Select(columnList, tableList, distinct, t.image, condition);
     }
@@ -189,5 +192,11 @@ TableList tableList(): {TableList list1; TableList list2; } {
 TableList singleTableList(): { Token t; } {
     t = <name> {
         return new TableList(t.image);
+    }
+}
+
+Delete delete(): { Token t; SearchCondition condition; } {
+    "DELETE" { condition = new SearchCondition(); } "FROM" t=<name> ("WHERE" condition = searchCondition())? {
+        return new Delete(t.image, condition);
     }
 }

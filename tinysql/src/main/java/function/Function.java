@@ -2,8 +2,12 @@ package function; /**
  * Created by Tao on 11/18/2016.
  */
 import java.util.ArrayList;
-import storageManager.*;
 
+import javafx.scene.control.Tab;
+import storageManager.*;
+import expression.SearchCondition;
+
+import javax.swing.plaf.nimbus.AbstractRegionPainter;
 import java.util.Arrays;
 
 public class Function {
@@ -22,7 +26,7 @@ public class Function {
 
 
 
-    public void clearMem()
+    private void clearMem()
     {
         int i=0;
         Block block=mem.getBlock(i++);
@@ -41,7 +45,7 @@ public class Function {
         Schema schema=new Schema(DataNames,field_types);
         System.out.println("Creating table " + TableName);
         Relation relation_reference=schema_manager.createRelation(TableName,schema);
-        System.out.print("The table has nameList " + relation_reference.getRelationName() + "\n");
+        System.out.print("The table has name " + relation_reference.getRelationName() + "\n");
         System.out.print("The table has schema:" + "\n");
         System.out.print(relation_reference.getSchema() + "\n");
         System.out.print("The table currently have " + relation_reference.getNumOfBlocks() + " blocks" + "\n");
@@ -123,20 +127,126 @@ public class Function {
         }
     }
 
+    private ArrayList<Tuple>getAllTuplesFromRelation(Relation relation_reference)
+    {
+        ArrayList<Tuple>res=new ArrayList<Tuple>();
+        int times=relation_reference.getNumOfBlocks()/Config.NUM_OF_BLOCKS_IN_MEMORY+1;
+        int start=0,number=relation_reference.getNumOfBlocks();
+        while(--times>=0)
+        {
+            clearMem();
+            relation_reference.getBlocks(start,0,number>10?10:number);
+            start+=10;
+            number-=10;
+            Block block=null;
+            for(int i=0;i<Config.NUM_OF_BLOCKS_IN_MEMORY;++i)
+            {
+                block=mem.getBlock(i);
+                if(block.isEmpty())break;
+                for(int j=0;j<block.getNumTuples();++j)res.add(block.getTuple(j));
+            }
+        }
+        return res;
+    }
 
+    public ArrayList<Tuple>selectFromTable(String TableName,SearchCondition sc)
+    {
+        ArrayList<Tuple>ans=new ArrayList<Tuple>();
+        Relation relation_reference=schema_manager.getRelation(TableName);
+        ArrayList<Tuple>res=getAllTuplesFromRelation(relation_reference);
+        if(sc.isEmpty)return res;
+        else
+        {
+            for(int i=0;i<res.size();++i)
+            {
+                if(sc.satisfy(res.get(i)))ans.add(res.get(i));
+            }
+        }
+        return ans;
+    }
+
+    private int writeBackToRelation(Relation relation_reference,ArrayList<Tuple>ans,int start,int total)
+    {
+        clearMem();
+        int index=0;
+        Block block=mem.getBlock(index);
+        for(int i=start;i<ans.size();++i)
+        {
+            block.appendTuple(ans.get(i));
+            if(block.isFull()||i==ans.size()-1)
+            {
+                relation_reference.setBlock(total++,index);
+                ++index;
+                if(index>=Config.NUM_OF_BLOCKS_IN_MEMORY)break;
+                block=mem.getBlock(index);
+            }
+        }
+        return total;
+    }
+
+    public void deleteFromTable(String TableName,SearchCondition sc)
+    {
+        ArrayList<Tuple>ans=new ArrayList<Tuple>();
+        Relation relation_reference=schema_manager.getRelation(TableName);
+        if(sc.isEmpty)
+        {
+            relation_reference.deleteBlocks(0);
+            return;
+        }
+        ArrayList<Tuple>res=getAllTuplesFromRelation(relation_reference);
+        for(int i=0;i<res.size();++i)
+        {
+            if(sc.satisfy(res.get(i)))ans.add(res.get(i));
+        }
+        int capacity = relation_reference.getSchema().getTuplesPerBlock()*Config.NUM_OF_BLOCKS_IN_MEMORY;
+        int times = ans.size() /capacity + 1;// times we need to flush to relation;
+        int start = 0,total=0;
+        while (--times >= 0)
+        {
+            total=writeBackToRelation(relation_reference, ans, start,total);
+            start +=capacity;
+        }
+        relation_reference.deleteBlocks(total);// empty the left block;
+    }
+    public void updateTable(String TableName, SearchCondition sc, ArrayList<String>fieldName,ArrayList<String>newValue)
+    {
+        Relation relation_reference=schema_manager.getRelation(TableName);
+        ArrayList<Tuple>res=getAllTuplesFromRelation(relation_reference);
+        Schema sch=relation_reference.getSchema();
+        for(int i=0;i<res.size();++i)
+        {
+            if(sc.isEmpty||sc.satisfy(res.get(i)))
+            {
+                for(int j=0;j<fieldName.size();++j)
+                {
+                    int index=sch.getFieldOffset(fieldName.get(j));
+                    if(sch.getFieldType(fieldName.get(j))==FieldType.STR20)res.get(i).setField(index,newValue.get(j));
+                    else res.get(i).setField(index,Integer.parseInt(newValue.get(j)));
+                }
+            }
+        }
+        int capacity = relation_reference.getSchema().getTuplesPerBlock()*Config.NUM_OF_BLOCKS_IN_MEMORY;
+        int times = res.size() / capacity + 1;// times we need to flush to relation;
+        int start = 0, total = 0;
+        while (--times >= 0)
+        {
+            total=writeBackToRelation(relation_reference, res, start, total);
+            start += capacity;
+        }
+    }
     public static void main(String[] args) {
         //create table
         String []name={"f1","f2","f3","f4"};
         String []type={"STR20", "INT", "INT", "STR20"};
         String [][]names={{ "f1", "f2", "f3", "f4" }, { "f1", "f2", "f3", "f4" }, { "f1", "f2", "f3", "f4" }, { "f1", "f2", "f3", "f4" }};
-        String [][]values={{ "h1", "20", "30", "h2" }, { "h3", "40", "50", "h4" }, { "h5", "60", "70", "h6" }, { "h7", "80", "90", "h8" }};
+        String [][]values={{ "h1", "20", "30", "h2" }, { "h3", "40", "50", "h4" }, { "h5", "60", "70", "h6" }, { "h7", "80", "90", "h8" },{ "h1", "20", "30", "h2" }, { "h3", "40", "50", "h4" }, { "h5", "60", "70", "h6" }, { "h7", "80", "90", "h8" },{ "h1", "20", "30", "h2" }, { "h3", "40", "50", "h4" }, { "h5", "60", "70", "h6" }, { "h7", "80", "90", "h8" },{ "h1", "20", "30", "h2" }, { "h3", "40", "50", "h4" }, { "h5", "60", "70", "h6" }, { "h7", "80", "90", "h8" },{ "h1", "20", "30", "h2" }, { "h3", "40", "50", "h4" }, { "h5", "60", "70", "h6" }, { "h7", "80", "90", "h8" },{ "h1", "20", "30", "h2" }, { "h3", "40", "50", "h4" }, { "h5", "60", "70", "h6" }, { "h7", "80", "90", "h8" }};
         ArrayList<String> field_name=new ArrayList<String>(Arrays.asList(name));
         ArrayList<String> field_type=new ArrayList<String>(Arrays.asList(type));
         ArrayList<ArrayList<String>>DataNames=new ArrayList<ArrayList<String>>();
         ArrayList<ArrayList<String>>DataValues=new ArrayList<ArrayList<String>>();
-        for(int i=0;i<4;++i)
+        for(int i=0;i<24;++i)
         {
-            DataNames.add(new ArrayList<String>(Arrays.asList(names[i])));
+            //DataNames.add(new ArrayList<String>(Arrays.asList(names[i])));
             DataValues.add(new ArrayList<String>(Arrays.asList(values[i])));
         }
         Function mf=new Function();
@@ -150,16 +260,28 @@ public class Function {
         Relation relation_reference=schema_manager.getRelation(TableName);
         System.out.println("-----------relation-------------------------");
         System.out.print(relation_reference + "\n");
-        System.out.println("----------memory--------------------------");
-        System.out.print(mem + "\n");
+
+        System.out.println("------------------test select------------------");
+
+        SearchCondition SC=new SearchCondition();
 
 
-        System.out.println("------------------------------------");
-        System.out.println("Drop table");
-        TableName="taobupt";
-        mf.createTable(TableName,field_name,field_type);
-        mf.dropTable(TableName);
-        System.out.println("done!");
+
+        ArrayList<String>fieldName=new ArrayList<String>();
+        ArrayList<String>newValue=new ArrayList<String>();
+        fieldName.add("f1");
+        fieldName.add("f4");
+        newValue.add("haha");
+        newValue.add("hehe");
+        mf.updateTable("wangtao",SC,fieldName,newValue);
+        mf.deleteFromTable("wangtao",SC);
+        ArrayList<Tuple>res=mf.selectFromTable("wangtao",SC);
+       // for(int i=0;i<res.size();++i)System.out.println(res.get(i));
+
+
+
+
+
 
     }
 }
