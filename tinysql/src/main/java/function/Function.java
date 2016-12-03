@@ -127,113 +127,182 @@ public class Function {
         }
     }
 
-    private ArrayList<Tuple>getAllTuplesFromRelation(Relation relation_reference)
-    {
-        ArrayList<Tuple>res=new ArrayList<Tuple>();
-        int times=relation_reference.getNumOfBlocks()/Config.NUM_OF_BLOCKS_IN_MEMORY+1;
-        int start=0,number=relation_reference.getNumOfBlocks();
-        while(--times>=0)
-        {
-            clearMem();
-            relation_reference.getBlocks(start,0,number>10?10:number);
-            start+=10;
-            number-=10;
-            Block block=null;
-            for(int i=0;i<Config.NUM_OF_BLOCKS_IN_MEMORY;++i)
-            {
-                block=mem.getBlock(i);
-                if(block.isEmpty())break;
-                for(int j=0;j<block.getNumTuples();++j)res.add(block.getTuple(j));
-            }
-        }
-        return res;
-    }
-
-    public ArrayList<Tuple>selectFromTable(String TableName,SearchCondition sc)
-    {
-        ArrayList<Tuple>ans=new ArrayList<Tuple>();
-        Relation relation_reference=schema_manager.getRelation(TableName);
-        ArrayList<Tuple>res=getAllTuplesFromRelation(relation_reference);
-        if(sc.isEmpty)return res;
-        else
-        {
-            for(int i=0;i<res.size();++i)
-            {
-                if(sc.satisfy(res.get(i)))ans.add(res.get(i));
-            }
-        }
-        return ans;
-    }
-
-    private int writeBackToRelation(Relation relation_reference,ArrayList<Tuple>ans,int start,int total)
+    private void getTuplesFromRelation(Relation relation_reference,int start,int number, SearchCondition sc)
     {
         clearMem();
-        int index=0;
-        Block block=mem.getBlock(index);
-        for(int i=start;i<ans.size();++i)
+       relation_reference.getBlocks(start,0,number>Config.NUM_OF_BLOCKS_IN_MEMORY?Config.NUM_OF_BLOCKS_IN_MEMORY:number);
+        Block block=null;
+        for(int i=0;i<Config.NUM_OF_BLOCKS_IN_MEMORY;++i)
         {
-            block.appendTuple(ans.get(i));
-            if(block.isFull()||i==ans.size()-1)
+            block=mem.getBlock(i);
+            if(block.isEmpty())break;
+            for(int j=0;j<block.getNumTuples();++j)
             {
-                relation_reference.setBlock(total++,index);
-                ++index;
-                if(index>=Config.NUM_OF_BLOCKS_IN_MEMORY)break;
-                block=mem.getBlock(index);
+                if(sc.isEmpty||sc.satisfy(block.getTuple(j)))
+                {
+                    System.out.println(block.getTuple(j));
+                }
             }
         }
-        return total;
     }
+
+    public void selectFromTable(String TableName,SearchCondition sc)
+    {
+        Relation relation_reference=schema_manager.getRelation(TableName);
+        int times=relation_reference.getNumOfBlocks()/Config.NUM_OF_BLOCKS_IN_MEMORY;
+        int start=0,number=relation_reference.getNumOfBlocks();
+        if(sc.isEmpty)return ;
+        else {
+        while(--times>=0)
+        {
+            getTuplesFromRelation(relation_reference,start,number,sc);
+            start+=Config.NUM_OF_BLOCKS_IN_MEMORY;
+            number-=Config.NUM_OF_BLOCKS_IN_MEMORY;
+        }
+        }
+    }
+
+//    private int writeBackToRelation(Relation relation_reference,ArrayList<Tuple>ans,int start,int total)
+//    {
+//        clearMem();
+//        int index=0;
+//        Block block=mem.getBlock(index);
+//        for(int i=start;i<ans.size();++i)
+//        {
+//            block.appendTuple(ans.get(i));
+//            if(block.isFull()||i==ans.size()-1)
+//            {
+//                relation_reference.setBlock(total++,index);
+//                ++index;
+//                if(index>=Config.NUM_OF_BLOCKS_IN_MEMORY)break;
+//                block=mem.getBlock(index);
+//            }
+//        }
+//        return total;
+//    }
 
     public void deleteFromTable(String TableName,SearchCondition sc)
     {
-        ArrayList<Tuple>ans=new ArrayList<Tuple>();
+       int totaltuple=0;
+        int tuplepos=0;
         Relation relation_reference=schema_manager.getRelation(TableName);
         if(sc.isEmpty)
         {
             relation_reference.deleteBlocks(0);
             return;
-        }
-        ArrayList<Tuple>res=getAllTuplesFromRelation(relation_reference);
-        for(int i=0;i<res.size();++i)
+        }else
         {
-            if(sc.satisfy(res.get(i)))ans.add(res.get(i));
-        }
-        int capacity = relation_reference.getSchema().getTuplesPerBlock()*Config.NUM_OF_BLOCKS_IN_MEMORY;
-        int times = ans.size() /capacity + 1;// times we need to flush to relation;
-        int start = 0,total=0;
-        while (--times >= 0)
-        {
-            total=writeBackToRelation(relation_reference, ans, start,total);
-            start +=capacity;
-        }
-        relation_reference.deleteBlocks(total);// empty the left block;
-    }
-    public void updateTable(String TableName, SearchCondition sc, ArrayList<String>fieldName,ArrayList<String>newValue)
-    {
-        Relation relation_reference=schema_manager.getRelation(TableName);
-        ArrayList<Tuple>res=getAllTuplesFromRelation(relation_reference);
-        Schema sch=relation_reference.getSchema();
-        for(int i=0;i<res.size();++i)
-        {
-            if(sc.isEmpty||sc.satisfy(res.get(i)))
+            int total=relation_reference.getNumOfBlocks();
+            int start=0;
+            int relation_block_index=0;
+            while(start<total)
             {
-                for(int j=0;j<fieldName.size();++j)
+                int blockpos=0;
+                if(start==0)
                 {
-                    int index=sch.getFieldOffset(fieldName.get(j));
-                    if(sch.getFieldType(fieldName.get(j))==FieldType.STR20)res.get(i).setField(index,newValue.get(j));
-                    else res.get(i).setField(index,Integer.parseInt(newValue.get(j)));
+                    relation_reference.getBlocks(start,0,Config.NUM_OF_BLOCKS_IN_MEMORY);
+                    Block block=null;
+                    for(int i=0;i<Config.NUM_OF_BLOCKS_IN_MEMORY;++i)
+                    {
+                        block=mem.getBlock(i);
+                        if(block.isEmpty())break;
+                        for(int j=0;j<block.getNumTuples();++j)
+                        {
+                            if(!sc.satisfy(block.getTuple(j)))
+                            {
+                                totaltuple++;
+                                if(tuplepos==relation_reference.getSchema().getTuplesPerBlock())
+                                {
+                                    blockpos++;
+                                    tuplepos=0;
+                                }
+                                mem.getBlock(blockpos).setTuple(tuplepos++,block.getTuple(j));
+                            }
+                        }
+                    }
+                    if(blockpos>0)
+                    {
+                        relation_reference.setBlocks(relation_block_index,0,blockpos);
+                        relation_block_index+=blockpos;
+                    }
+                    if(tuplepos!=0)
+                    {
+                        mem.setBlock(0,mem.getBlock(blockpos+1));
+                        for(int j=tuplepos;j<relation_reference.getSchema().getTuplesPerBlock();++j)
+                        {
+                            mem.getBlock(0).invalidateTuple(j);
+                        }
+                    }
+                    start+=Config.NUM_OF_BLOCKS_IN_MEMORY;
+                }else
+                {
+                    relation_reference.getBlocks(start,1,Config.NUM_OF_BLOCKS_IN_MEMORY);
+                    Block block=null;
+                    for(int i=1;i<Config.NUM_OF_BLOCKS_IN_MEMORY;++i)
+                    {
+                        block=mem.getBlock(i);
+                        if(block.isEmpty())break;
+                        for(int j=0;j<block.getNumTuples();++j)
+                        {
+                            if(!sc.satisfy(block.getTuple(j)))
+                            {
+                                totaltuple++;
+                                if(tuplepos==relation_reference.getSchema().getTuplesPerBlock())
+                                {
+                                    blockpos++;
+                                    tuplepos=0;
+                                }
+                                mem.getBlock(blockpos).setTuple(tuplepos++,block.getTuple(j));
+                            }
+                        }
+                        if(blockpos>0)
+                        {
+                            relation_reference.setBlocks(relation_block_index,0,blockpos);
+                            relation_block_index+=blockpos;
+                        }
+                        if(tuplepos!=0)
+                        {
+                            mem.setBlock(0,mem.getBlock(blockpos+1));
+                            for(int j=tuplepos;j<relation_reference.getSchema().getTuplesPerBlock();++j)
+                            {
+                                mem.getBlock(0).invalidateTuple(j);
+                            }
+                        }
+                        start+=Config.NUM_OF_BLOCKS_IN_MEMORY-1;
+                    }
                 }
             }
+            relation_reference.deleteBlocks(totaltuple/relation_reference.getSchema().getTuplesPerBlock());
+            if(!mem.getBlock(0).isEmpty())relation_reference.setBlock(relation_reference.getNumOfBlocks(),0);
         }
-        int capacity = relation_reference.getSchema().getTuplesPerBlock()*Config.NUM_OF_BLOCKS_IN_MEMORY;
-        int times = res.size() / capacity + 1;// times we need to flush to relation;
-        int start = 0, total = 0;
-        while (--times >= 0)
-        {
-            total=writeBackToRelation(relation_reference, res, start, total);
-            start += capacity;
-        }
+
     }
+//    public void updateTable(String TableName, SearchCondition sc, ArrayList<String>fieldName,ArrayList<String>newValue)
+//    {
+//        Relation relation_reference=schema_manager.getRelation(TableName);
+//        ArrayList<Tuple>res=getAllTuplesFromRelation(relation_reference);
+//        Schema sch=relation_reference.getSchema();
+//        for(int i=0;i<res.size();++i)
+//        {
+//            if(sc.isEmpty||sc.satisfy(res.get(i)))
+//            {
+//                for(int j=0;j<fieldName.size();++j)
+//                {
+//                    int index=sch.getFieldOffset(fieldName.get(j));
+//                    if(sch.getFieldType(fieldName.get(j))==FieldType.STR20)res.get(i).setField(index,newValue.get(j));
+//                    else res.get(i).setField(index,Integer.parseInt(newValue.get(j)));
+//                }
+//            }
+//        }
+//        int capacity = relation_reference.getSchema().getTuplesPerBlock()*Config.NUM_OF_BLOCKS_IN_MEMORY;
+//        int times = res.size() / capacity + 1;// times we need to flush to relation;
+//        int start = 0, total = 0;
+//        while (--times >= 0)
+//        {
+//            total=writeBackToRelation(relation_reference, res, start, total);
+//            start += capacity;
+//        }
+//    }
     public static void main(String[] args) {
         //create table
         String []name={"f1","f2","f3","f4"};
@@ -273,9 +342,6 @@ public class Function {
         fieldName.add("f4");
         newValue.add("haha");
         newValue.add("hehe");
-        mf.updateTable("wangtao",SC,fieldName,newValue);
-        mf.deleteFromTable("wangtao",SC);
-        ArrayList<Tuple>res=mf.selectFromTable("wangtao",SC);
        // for(int i=0;i<res.size();++i)System.out.println(res.get(i));
 
 
