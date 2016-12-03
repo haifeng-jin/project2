@@ -238,14 +238,14 @@ public class Parser implements ParserConstants {
   }
 
   final public Expression expression() throws ParseException {
-                          String term1; String term2;
+                          Term term1; Term term2;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case integer:
     case name:
     case column_name:
     case literal:
       term1 = term();
-        {if (true) return new Expression(term1);}
+        {if (true) return new Expression(term1.term, term1.type);}
       break;
     default:
       jj_la1[7] = jj_gen;
@@ -255,14 +255,14 @@ public class Parser implements ParserConstants {
         jj_consume_token(7);
         term2 = term();
         jj_consume_token(6);
-        {if (true) return new Expression(term1, "+", term2);}
+        {if (true) return new Expression(term1.term, "+", term2.term);}
       } else if (jj_2_2(3)) {
         jj_consume_token(5);
         term1 = term();
         jj_consume_token(27);
         term2 = term();
         jj_consume_token(6);
-        {if (true) return new Expression(term1, "-", term2);}
+        {if (true) return new Expression(term1.term, "-", term2.term);}
       } else {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case 5:
@@ -271,7 +271,7 @@ public class Parser implements ParserConstants {
           jj_consume_token(8);
           term2 = term();
           jj_consume_token(6);
-        {if (true) return new Expression(term1, "*", term2);}
+        {if (true) return new Expression(term1.term, "*", term2.term);}
           break;
         default:
           jj_la1[8] = jj_gen;
@@ -283,24 +283,26 @@ public class Parser implements ParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  final public String term() throws ParseException {
-                Token t;
+  final public Term term() throws ParseException {
+              Token t;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case column_name:
       t = jj_consume_token(column_name);
-        {if (true) return t.image;}
+        {if (true) return new Term(t.image, "column_name");}
       break;
     case literal:
       t = jj_consume_token(literal);
-        {if (true) return t.image;}
+        String st = t.image;
+        st = st.substring(1, st.length() - 1);
+        {if (true) return new Term(st, "literal");}
       break;
     case name:
       t = jj_consume_token(name);
-        {if (true) return t.image;}
+        {if (true) return new Term(t.image, "name");}
       break;
     case integer:
       t = jj_consume_token(integer);
-        {if (true) return t.image;}
+        {if (true) return new Term(t.image, "integer");}
       break;
     default:
       jj_la1[9] = jj_gen;
@@ -494,6 +496,11 @@ public class Parser implements ParserConstants {
     return false;
   }
 
+  private boolean jj_3R_12() {
+    if (jj_scan_token(integer)) return true;
+    return false;
+  }
+
   private boolean jj_3R_9() {
     if (jj_scan_token(column_name)) return true;
     return false;
@@ -512,11 +519,6 @@ public class Parser implements ParserConstants {
     }
     }
     }
-    return false;
-  }
-
-  private boolean jj_3R_12() {
-    if (jj_scan_token(integer)) return true;
     return false;
   }
 

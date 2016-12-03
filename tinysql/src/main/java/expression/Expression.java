@@ -1,10 +1,9 @@
 package expression;
 
-import storageManager.Tuple;
-
 import java.math.BigDecimal;
 
 public class Expression {
+    String type;
     String term1;
     String op;
     String term2;
@@ -13,12 +12,14 @@ public class Expression {
         this.term1 = term1;
         this.op = op;
         this.term2 = term2;
+        this.type = "integer";
     }
 
-    public Expression(String term1) {
+    public Expression(String term1, String type) {
         this.term1 = term1;
         this.op = null;
         this.term2 = null;
+        this.type = type;
     }
 
     String getValue() throws Exception {

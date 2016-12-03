@@ -7,7 +7,7 @@ import java.util.ArrayList;
 public class SearchCondition implements Satisfiable{
     ArrayList<BooleanTerm> list;
     public boolean isEmpty;
-    private String[] tableArray;
+    String[] tableArray;
 
     public SearchCondition() {
         isEmpty = true;
@@ -27,11 +27,11 @@ public class SearchCondition implements Satisfiable{
 
     public boolean satisfy(Tuple tuple) {
         for (BooleanTerm term : list) {
-            if (!term.satisfy(tuple)) {
-                return false;
+            if (term.satisfy(tuple)) {
+                return true;
             }
         }
-        return true;
+        return false;
     }
 
     public String toString() {
@@ -40,5 +40,8 @@ public class SearchCondition implements Satisfiable{
 
     public void setTableArray(String[] tableArray) {
         this.tableArray = tableArray;
+        for (BooleanTerm term : list) {
+            term.setTableArray(tableArray);
+        }
     }
 }

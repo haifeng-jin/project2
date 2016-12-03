@@ -18,7 +18,7 @@ public class Select extends Statement{
     }
 
     public void execute(Function function) {
-
+        function.selectFromTable(tableList.list.get(0), condition);
     }
 
     public String toString() {

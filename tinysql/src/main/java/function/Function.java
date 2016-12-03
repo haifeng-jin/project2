@@ -14,7 +14,7 @@ public class Function {
 
     static MainMemory mem=null;
     static Disk disk=null;
-    static SchemaManager schema_manager=null;
+    public static SchemaManager schema_manager=null;
     public Function() {
         mem = new MainMemory();
         disk = new Disk();

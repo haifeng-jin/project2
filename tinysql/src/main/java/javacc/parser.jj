@@ -136,27 +136,29 @@ BooleanTerm booleanFactor(): {Expression exp1; Expression exp2; Token t;} {
     }
 }
 
-Expression expression(): {String term1; String term2;} {
+Expression expression(): {Term term1; Term term2;} {
     term1 = term() {
-        return new Expression(term1);
+        return new Expression(term1.term, term1.type);
     } | LOOKAHEAD(3) "(" term1 = term() "+" term2=term() ")" {
-        return new Expression(term1, "+", term2);
+        return new Expression(term1.term, "+", term2.term);
     } | LOOKAHEAD(3) "(" term1 = term() "-" term2=term() ")" {
-        return new Expression(term1, "-", term2);
+        return new Expression(term1.term, "-", term2.term);
     } | "(" term1 = term() "*" term2=term() ")" {
-        return new Expression(term1, "*", term2);
+        return new Expression(term1.term, "*", term2.term);
     }
 }
 
-String term(): {Token t;} {
+Term term(): {Token t;} {
     t = <column_name> {
-        return t.image;
+        return new Term(t.image, "column_name");
     } | t = <literal> {
-        return t.image;
+        String st = t.image;
+        st = st.substring(1, st.length() - 1);
+        return new Term(st, "literal");
     } | t = <name> {
-        return t.image;
+        return new Term(t.image, "name");
     } | t = <integer> {
-        return t.image;
+        return new Term(t.image, "integer");
     }
 }
 

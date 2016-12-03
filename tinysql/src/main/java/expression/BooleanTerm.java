@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 public class BooleanTerm implements Satisfiable{
     ArrayList<BooleanFactor> list;
+    String[] tableArray;
 
     public BooleanTerm(BooleanFactor factor) {
         this.list = new ArrayList<BooleanFactor>();
@@ -25,6 +26,13 @@ public class BooleanTerm implements Satisfiable{
             }
         }
         return true;
+    }
+
+    public void setTableArray(String[] tableArray) {
+        this.tableArray = tableArray;
+        for (BooleanFactor factor: list) {
+            factor.setTableArray(tableArray);
+        }
     }
 
     public String toString() {
