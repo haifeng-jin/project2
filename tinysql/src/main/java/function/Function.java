@@ -34,6 +34,38 @@ public class Function {
             block.clear();
         }
     }
+
+
+    private ArrayList<Tuple>getAllTuplesFromTuple(String TableName)
+    {
+        Relation relation_reference=schema_manager.getRelation(TableName);
+        int start=0,total=relation_reference.getNumOfBlocks(),number=total;
+        ArrayList<Tuple>res=new ArrayList<Tuple>();
+        while(start<total)
+        {
+            clearMem();
+
+            if(number>0)
+            {
+                relation_reference.getBlocks(start,0,number>Config.NUM_OF_BLOCKS_IN_MEMORY?Config.NUM_OF_BLOCKS_IN_MEMORY:number);
+                start+=Math.min(number,Config.NUM_OF_BLOCKS_IN_MEMORY);
+                number-=Math.min(number,Config.NUM_OF_BLOCKS_IN_MEMORY);
+                for(int i=0;i<Config.NUM_OF_BLOCKS_IN_MEMORY;++i)
+                {
+                    Block block=mem.getBlock(i);
+                    for(int j=0;j<block.getNumTuples();++j)
+                    {
+                        if(!block.isEmpty() && !block.getTuple(j).isNull())
+                        {
+                            res.add(block.getTuple(j));
+                        }
+                    }
+                }
+            }
+        }
+        return res;
+    }
+
     public Relation createTable(String TableName, ArrayList<String> DataNames, ArrayList<String> Datatypes)
     {
         System.out.println("Creating table " + TableName);
