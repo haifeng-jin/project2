@@ -17,7 +17,9 @@ public class FunctionTest {
 
     final static String[] statements = {"CREATE TABLE course (sid INT, homework INT, project INT, exam INT, grade STR20)",
             "INSERT INTO course (sid, homework, project, exam, grade) VALUES (1, 99, 100, 100, \"A\")",
-            "SELECT * FROM course"
+            "SELECT * FROM course",
+            "SELECT * FROM course WHERE exam = 100",
+            "SELECT * FROM course WHERE (exam + homework) = 200"
     };
     final static String[] dataNameArray = {"sid", "homework", "project", "exam", "grade"};
     final static String[] dataTypeArray = {"INT", "INT", "INT", "INT", "STR20"};
@@ -67,10 +69,13 @@ public class FunctionTest {
     public void testInsertNtimes() {
         Function function = new Function();
         function.createTable(tableName, dataNames, dataTypes);
-        Relation relation = function.insertIntoTableNtimes(tableName, dataNames, dataValues1);
+        function.insertIntoTableNtimes(tableName, dataNames, dataValues1);
+        Relation relation = function.insertIntoTableNtimes(tableName, dataNames, dataValues2);
+        assertEquals(2, relation.getNumOfBlocks());
         assertEquals("******RELATION DUMP BEGIN******\n" +
                 "sid\thomework\tproject\texam\tgrade\t\n" +
                 "0: 1\t99\t100\t100\t\"A\"\t\n" +
+                "1: 2\t99\t100\t100\t\"A\"\t\n" +
                 "******RELATION DUMP END******", relation.toString());
         function.insertIntoTableNtimes(tableName, dataNames, dataValues2);
     }
@@ -78,7 +83,7 @@ public class FunctionTest {
     @Test
     public void testSelectWhere() {
         Function function = new Function();
-        Relation relation = function.createTable(tableName, dataNames, dataTypes);
+        function.createTable(tableName, dataNames, dataTypes);
         function.insertIntoTableNtimes(tableName, dataNames, dataValues1);
         function.insertIntoTableNtimes(tableName, dataNames, dataValues2);
         searchCondition.setTableArray(new String[]{tableName});
@@ -87,7 +92,26 @@ public class FunctionTest {
     }
 
     @Test
-    public void testDelete() {
+    public void testDelete1() {
+        Function function = new Function();
+        function.createTable(tableName, dataNames, dataTypes);
+        function.insertIntoTableNtimes(tableName, dataNames, dataValues1);
+        function.insertIntoTableNtimes(tableName, dataNames, dataValues2);
+        searchCondition.setTableArray(new String[]{tableName});
+        function.deleteFromTable(tableName, new SearchCondition());
+        String selection = function.selectFromTable(tableName, searchCondition);
+        assertEquals("", selection);
+    }
 
+    @Test
+    public void testDelete2() {
+        Function function = new Function();
+        function.createTable(tableName, dataNames, dataTypes);
+        function.insertIntoTableNtimes(tableName, dataNames, dataValues1);
+        function.insertIntoTableNtimes(tableName, dataNames, dataValues2);
+        searchCondition.setTableArray(new String[]{tableName});
+        function.deleteFromTable(tableName, searchCondition);
+        String selection = function.selectFromTable(tableName, new SearchCondition());
+        assertEquals("1\t99\t100\t100\t\"A\"\t\n", selection);
     }
 }

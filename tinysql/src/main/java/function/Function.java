@@ -57,7 +57,8 @@ public class Function {
         Schema sc=relation_reference.getSchema();
         for(int i=0;i<n;++i)
         {
-            if(sc.getFieldType(i).equals(FieldType.STR20))tuple.setField(DataNames.get(i),DataValues.get(i));
+            if (sc.getFieldType(DataNames.get(i)).equals(FieldType.STR20))
+                tuple.setField(DataNames.get(i),DataValues.get(i));
             else tuple.setField(DataNames.get(i),Integer.parseInt(DataValues.get(i)));
         }
         Schema tuple_schema = tuple.getSchema();
@@ -68,8 +69,22 @@ public class Function {
     {
         clearMem();
         Block block_ptr=mem.getBlock(0);
+        if (relation_reference.getNumOfBlocks() == 0) {
+            insertIntoTable(relation_reference,DataName,DataValues,block_ptr);
+            relation_reference.setBlock(relation_reference.getNumOfBlocks(), 0);
+            return;
+        }
+        int last_index = relation_reference.getNumOfBlocks() - 1;
+        relation_reference.getBlock(last_index, 0);
+        block_ptr=mem.getBlock(0);
+        if (block_ptr.isFull()) {
+            block_ptr = mem.getBlock(1);
+            insertIntoTable(relation_reference,DataName,DataValues,block_ptr);
+            relation_reference.setBlock(relation_reference.getNumOfBlocks(), 1);
+            return;
+        }
         insertIntoTable(relation_reference,DataName,DataValues,block_ptr);
-        relation_reference.setBlock(relation_reference.getNumOfBlocks(), 0);
+        relation_reference.setBlock(relation_reference.getNumOfBlocks() - 1, 0);
     }
 
     public Relation insertIntoTableNtimes(String TableName, ArrayList<String>DataName, ArrayList<String> DataValues)
@@ -90,12 +105,15 @@ public class Function {
     {
         String ret = "";
         clearMem();
+        if (number == 0)
+            return ret;
         relation_reference.getBlocks(start,0,number>Config.NUM_OF_BLOCKS_IN_MEMORY?Config.NUM_OF_BLOCKS_IN_MEMORY:number);
         Block block=null;
         for(int i=0;i<Config.NUM_OF_BLOCKS_IN_MEMORY;++i)
         {
             block=mem.getBlock(i);
-            if(block.isEmpty())break;
+            if(block.isEmpty())
+                continue;
             for(int j=0;j<block.getNumTuples();++j)
             {
                 if(sc.isEmpty||sc.satisfy(block.getTuple(j)))
@@ -145,101 +163,40 @@ public class Function {
 
     public void deleteFromTable(String TableName,SearchCondition sc)
     {
-       int totaltuple=0;
-        int tuplepos=0;
         Relation relation_reference=schema_manager.getRelation(TableName);
         if(sc.isEmpty)
         {
             relation_reference.deleteBlocks(0);
             return;
-        }else
+        }
+        int total=relation_reference.getNumOfBlocks();
+        int start=0;
+        while(start<total)
         {
-            int total=relation_reference.getNumOfBlocks();
-            int start=0;
-            int relation_block_index=0;
-            while(start<total)
-            {
-                int blockpos=0;
-                if(start==0)
-                {
-                    relation_reference.getBlocks(start,0,Config.NUM_OF_BLOCKS_IN_MEMORY);
-                    Block block=null;
-                    for(int i=0;i<Config.NUM_OF_BLOCKS_IN_MEMORY;++i)
-                    {
-                        block=mem.getBlock(i);
-                        if(block.isEmpty())break;
-                        for(int j=0;j<block.getNumTuples();++j)
-                        {
-                            if(!sc.satisfy(block.getTuple(j)))
-                            {
-                                totaltuple++;
-                                if(tuplepos==relation_reference.getSchema().getTuplesPerBlock())
-                                {
-                                    blockpos++;
-                                    tuplepos=0;
-                                }
-                                mem.getBlock(blockpos).setTuple(tuplepos++,block.getTuple(j));
-                            }
-                        }
-                    }
-                    if(blockpos>0)
-                    {
-                        relation_reference.setBlocks(relation_block_index,0,blockpos);
-                        relation_block_index+=blockpos;
-                    }
-                    if(tuplepos!=0)
-                    {
-                        mem.setBlock(0,mem.getBlock(blockpos+1));
-                        for(int j=tuplepos;j<relation_reference.getSchema().getTuplesPerBlock();++j)
-                        {
-                            mem.getBlock(0).invalidateTuple(j);
-                        }
-                    }
-                    start+=Config.NUM_OF_BLOCKS_IN_MEMORY;
-                }else
-                {
-                    relation_reference.getBlocks(start,1,Config.NUM_OF_BLOCKS_IN_MEMORY);
-                    Block block=null;
-                    for(int i=1;i<Config.NUM_OF_BLOCKS_IN_MEMORY;++i)
-                    {
-                        block=mem.getBlock(i);
-                        if(block.isEmpty())break;
-                        for(int j=0;j<block.getNumTuples();++j)
-                        {
-                            if(!sc.satisfy(block.getTuple(j)))
-                            {
-                                totaltuple++;
-                                if(tuplepos==relation_reference.getSchema().getTuplesPerBlock())
-                                {
-                                    blockpos++;
-                                    tuplepos=0;
-                                }
-                                mem.getBlock(blockpos).setTuple(tuplepos++,block.getTuple(j));
-                            }
-                        }
-                        if(blockpos>0)
-                        {
-                            relation_reference.setBlocks(relation_block_index,0,blockpos);
-                            relation_block_index+=blockpos;
-                        }
-                        if(tuplepos!=0)
-                        {
-                            mem.setBlock(0,mem.getBlock(blockpos+1));
-                            for(int j=tuplepos;j<relation_reference.getSchema().getTuplesPerBlock();++j)
-                            {
-                                mem.getBlock(0).invalidateTuple(j);
-                            }
-                        }
-                        start+=Config.NUM_OF_BLOCKS_IN_MEMORY-1;
-                    }
+            int block_num = Math.min(Config.NUM_OF_BLOCKS_IN_MEMORY, relation_reference.getNumOfBlocks());
+            if (block_num == 0)
+                return;
+            relation_reference.getBlocks(start, 0, block_num);
+
+            deleteTuplesInMemory(block_num, sc);
+            relation_reference.setBlocks(start, 0, block_num);
+
+            start+=block_num;
+        }
+    }
+
+    private void deleteTuplesInMemory(int block_num, SearchCondition sc) {
+        for(int i=1;i<block_num;++i) {
+            Block block=mem.getBlock(i);
+            for(int j=0;j<block.getNumTuples();++j) {
+                if (sc.satisfy(block.getTuple(j))) {
+                    block.invalidateTuple(j);
                 }
             }
-            relation_reference.deleteBlocks(totaltuple/relation_reference.getSchema().getTuplesPerBlock());
-            if(!mem.getBlock(0).isEmpty())relation_reference.setBlock(relation_reference.getNumOfBlocks(),0);
         }
-
     }
-//    public void updateTable(String TableName, SearchCondition sc, ArrayList<String>fieldName,ArrayList<String>newValue)
+
+    //    public void updateTable(String TableName, SearchCondition sc, ArrayList<String>fieldName,ArrayList<String>newValue)
 //    {
 //        Relation relation_reference=schema_manager.getRelation(TableName);
 //        ArrayList<Tuple>res=getAllTuplesFromRelation(relation_reference);

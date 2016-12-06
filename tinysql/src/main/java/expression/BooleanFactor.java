@@ -41,18 +41,18 @@ public class BooleanFactor implements Satisfiable{
 
     private String getValue(Expression exp, Tuple tuple) throws Exception {
         if (exp.type.equals("integer")) {
-            return exp.getValue();
+            return exp.getValue(tuple);
         }
         if (exp.type.equals("literal")) {
-            return exp.getValue();
+            return exp.getValue(tuple);
         }
         String tableName;
         String columnName;
         if (exp.type.equals("column_name")) {
-            tableName = exp.getValue().split(".")[0];
-            columnName = exp.getValue().split(".")[1];
+            tableName = exp.getValue(tuple).split(".")[0];
+            columnName = exp.getValue(tuple).split(".")[1];
         } else {
-            columnName = exp.getValue();
+            columnName = exp.getValue(tuple);
             for (String name : tableArray) {
                 if (Function.schema_manager.getRelation(name).getSchema().getFieldNames().contains(columnName)) {
                     tableName = name;
@@ -65,6 +65,8 @@ public class BooleanFactor implements Satisfiable{
 
     public void setTableArray(String[] tableArray) {
         this.tableArray = tableArray;
+        exp1.setTableArray(tableArray);
+        exp2.setTableArray(tableArray);
     }
 
     public String toString() {

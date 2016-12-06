@@ -40,6 +40,8 @@ public class SearchCondition implements Satisfiable{
 
     public void setTableArray(String[] tableArray) {
         this.tableArray = tableArray;
+        if (list == null)
+            return;
         for (BooleanTerm term : list) {
             term.setTableArray(tableArray);
         }

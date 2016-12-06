@@ -15,6 +15,7 @@ public class Select extends Statement{
         this.distinct = distinct;
         this.orderBy = orderBy;
         this.condition = condition;
+        condition.setTableArray(tableList.list.toArray(new String[]{}));
     }
 
     public void execute(Function function) {

@@ -9,7 +9,10 @@ public class Delete extends Statement {
     public Delete(String tableName, SearchCondition condition) {
         this.tableName = tableName;
         this.condition = condition;
-        condition.setTableArray(new String[]{tableName});
+        if (this.condition == null) {
+            this.condition = new SearchCondition();
+        }
+        this.condition.setTableArray(new String[]{tableName});
     }
 
     public String toString() {
