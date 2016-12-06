@@ -101,7 +101,7 @@ public class Function {
         return relation_reference;
     }
 
-    String getTuplesFromRelation(Relation relation_reference,int start,int number, SearchCondition sc)
+    String getTuplesFromRelation(Relation relation_reference, int start, int number, ArrayList<String> dataNames, SearchCondition sc)
     {
         String ret = "";
         clearMem();
@@ -116,17 +116,27 @@ public class Function {
                 continue;
             for(int j=0;j<block.getNumTuples();++j)
             {
-                if(sc.isEmpty||sc.satisfy(block.getTuple(j)))
+                Tuple tuple = block.getTuple(j);
+                if(sc.isEmpty||sc.satisfy(tuple))
                 {
-                    System.out.println(block.getTuple(j));
-                    ret += block.getTuple(j) + "\n";
+                    if (dataNames.get(0).equals("*")) {
+                        System.out.println(tuple);
+                        ret += tuple + "\n";
+                        continue;
+                    }
+                    String temp = "";
+                    for (String name : dataNames) {
+                        temp += tuple.getField(name) + "\t";
+                    }
+                    System.out.println(temp);
+                    ret += temp + "\n";
                 }
             }
         }
         return ret;
     }
 
-    public String selectFromTable(String TableName, SearchCondition sc)
+    public String selectFromTable(String TableName, ArrayList<String> dataNames, SearchCondition sc)
     {
         System.out.println("SelectFromTable is called.");
         String ret = "";
@@ -135,7 +145,7 @@ public class Function {
         int start=0,number=relation_reference.getNumOfBlocks();
         while(--times>=0)
         {
-            ret += getTuplesFromRelation(relation_reference,start,number,sc);
+            ret += getTuplesFromRelation(relation_reference,start,number,dataNames,sc);
             start+=Config.NUM_OF_BLOCKS_IN_MEMORY;
             number-=Config.NUM_OF_BLOCKS_IN_MEMORY;
         }

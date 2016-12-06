@@ -27,18 +27,30 @@ public class FunctionTest {
     final static String[] dataValueArray2 = {"2", "99", "100", "100", "\"A\""};
     final static String tableName = "course";
     final static String searchConditionStatement = "sid = 2";
-    final static ArrayList<String> dataTypes = new ArrayList<String>();
-    final static ArrayList<String> dataNames = new ArrayList<String>();
-    final static ArrayList<String> dataValues1 = new ArrayList<String>();
-    final static ArrayList<String> dataValues2 = new ArrayList<String>();
+    static ArrayList<String> dataTypes = null;
+    static ArrayList<String> dataNames = null;
+    static ArrayList<String> dataValues1 = null;
+    static ArrayList<String> dataValues2 = null;
     static SearchCondition searchCondition = null;
+    static ArrayList<String> fieldList = null;
+    static ArrayList<String> fieldListStar = null;
+
 
     @Before
     public void setUp() {
+        dataNames = new ArrayList<String>();
+        dataTypes = new ArrayList<String>();
+        dataValues1 = new ArrayList<String>();
+        dataValues2= new ArrayList<String>();
+        fieldListStar = new ArrayList<String>();
+        fieldList = new ArrayList<String>();
         Collections.addAll(dataNames, dataNameArray);
         Collections.addAll(dataTypes, dataTypeArray);
         Collections.addAll(dataValues1, dataValueArray1);
         Collections.addAll(dataValues2, dataValueArray2);
+        fieldList.add("homework");
+        fieldList.add("exam");
+        fieldListStar.add("*");
         try {
             searchCondition = new Parser(new StringReader(searchConditionStatement)).searchCondition();
         } catch (ParseException e) {
@@ -61,7 +73,7 @@ public class FunctionTest {
         Relation relation = function.createTable(tableName, dataNames, dataTypes);
         function.insertIntoTableNtimes(tableName, dataNames, dataValues1);
         function.insertIntoTableNtimes(tableName, dataNames, dataValues2);
-        String selection = function.getTuplesFromRelation(relation, 0, 1, new SearchCondition());
+        String selection = function.getTuplesFromRelation(relation, 0, 1, dataNames, new SearchCondition());
         assertEquals("1\t99\t100\t100\t\"A\"\t\n", selection);
     }
 
@@ -87,8 +99,19 @@ public class FunctionTest {
         function.insertIntoTableNtimes(tableName, dataNames, dataValues1);
         function.insertIntoTableNtimes(tableName, dataNames, dataValues2);
         searchCondition.setTableArray(new String[]{tableName});
-        String selection = function.selectFromTable(tableName, searchCondition);
+        String selection = function.selectFromTable(tableName, fieldListStar, searchCondition);
         assertEquals("2\t99\t100\t100\t\"A\"\t\n", selection);
+    }
+
+    @Test
+    public void testSelectWhere2() {
+        Function function = new Function();
+        function.createTable(tableName, dataNames, dataTypes);
+        function.insertIntoTableNtimes(tableName, dataNames, dataValues1);
+        function.insertIntoTableNtimes(tableName, dataNames, dataValues2);
+        searchCondition.setTableArray(new String[]{tableName});
+        String selection = function.selectFromTable(tableName, fieldList, searchCondition);
+        assertEquals("99\t100\t\n", selection);
     }
 
     @Test
@@ -99,7 +122,7 @@ public class FunctionTest {
         function.insertIntoTableNtimes(tableName, dataNames, dataValues2);
         searchCondition.setTableArray(new String[]{tableName});
         function.deleteFromTable(tableName, new SearchCondition());
-        String selection = function.selectFromTable(tableName, searchCondition);
+        String selection = function.selectFromTable(tableName, fieldListStar, searchCondition);
         assertEquals("", selection);
     }
 
@@ -111,7 +134,7 @@ public class FunctionTest {
         function.insertIntoTableNtimes(tableName, dataNames, dataValues2);
         searchCondition.setTableArray(new String[]{tableName});
         function.deleteFromTable(tableName, searchCondition);
-        String selection = function.selectFromTable(tableName, new SearchCondition());
+        String selection = function.selectFromTable(tableName, fieldListStar, new SearchCondition());
         assertEquals("1\t99\t100\t100\t\"A\"\t\n", selection);
     }
 }
