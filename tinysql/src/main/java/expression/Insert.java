@@ -16,9 +16,7 @@ public class Insert extends Statement {
     }
 
     public void execute(Function function) {
-        ArrayList<ArrayList<String>> valueList = new ArrayList<ArrayList<String>>();
-        valueList.add(tuples.list.value);
-        function.insertIntoTableNtimes(tableName, list.nameList, valueList);
+        function.insertIntoTableNtimes(tableName, list.nameList, tuples.list.value);
     }
 
     public String toString() {

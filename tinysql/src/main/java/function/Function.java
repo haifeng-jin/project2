@@ -3,11 +3,9 @@ package function; /**
  */
 import java.util.ArrayList;
 
-import javafx.scene.control.Tab;
 import storageManager.*;
 import expression.SearchCondition;
 
-import javax.swing.plaf.nimbus.AbstractRegionPainter;
 import java.util.Arrays;
 
 public class Function {
@@ -21,7 +19,6 @@ public class Function {
         // System.out.print("The memory contains " + mem.getMemorySize() + " blocks" + "\n");
         // System.out.print(mem + "\n" + "\n");
         schema_manager = new SchemaManager(mem, disk);
-        System.out.println("hello world");
     }
 
 
@@ -37,29 +34,20 @@ public class Function {
             block.clear();
         }
     }
-    public void createTable(String TableName, ArrayList<String> DataNames, ArrayList<String> Datatypes)
+    public Relation createTable(String TableName, ArrayList<String> DataNames, ArrayList<String> Datatypes)
     {
-        System.out.println("Creating a schema");
+        System.out.println("Creating table " + TableName);
         ArrayList<FieldType> field_types=new ArrayList<FieldType>();
         for(String str:Datatypes)field_types.add(str.equals("STR20")?FieldType.STR20:FieldType.INT);
         Schema schema=new Schema(DataNames,field_types);
-        System.out.println("Creating table " + TableName);
         Relation relation_reference=schema_manager.createRelation(TableName,schema);
-        System.out.print("The table has name " + relation_reference.getRelationName() + "\n");
-        System.out.print("The table has schema:" + "\n");
-        System.out.print(relation_reference.getSchema() + "\n");
-        System.out.print("The table currently have " + relation_reference.getNumOfBlocks() + " blocks" + "\n");
-        System.out.print("The table currently have " + relation_reference.getNumOfTuples() + " tuples" + "\n" + "\n");
-        System.out.flush();
+        return relation_reference;
     }
 
     public void dropTable(String TableName)
     {
         System.out.println("Deleting Table "+TableName);
         schema_manager.deleteRelation(TableName);
-        System.out.println("After deleting a realtion, current schemas and relations: " );
-        System.out.print(schema_manager + "\n" + "\n");
-        System.out.flush();
     }
 
     private void insertIntoTable(Relation relation_reference,ArrayList<String> DataNames,ArrayList<String> DataValues,Block block)
@@ -72,65 +60,37 @@ public class Function {
             if(sc.getFieldType(i).equals(FieldType.STR20))tuple.setField(DataNames.get(i),DataValues.get(i));
             else tuple.setField(DataNames.get(i),Integer.parseInt(DataValues.get(i)));
         }
-        System.out.print("Created a tuple " + tuple + " of"+"through the relation" + "\n");
-        System.out.print("The tuple is invalid? " + (tuple.isNull()?"TRUE":"FALSE") + "\n");
         Schema tuple_schema = tuple.getSchema();
-        System.out.print("The tuple has schema" + "\n");
-        System.out.print(tuple_schema + "\n");
-        System.out.print("A block can allow at most " + tuple.getTuplesPerBlock() + " such tuples" + "\n");
-
-        System.out.print("The tuple has fields: " + "\n");
-        for (int i=0; i<tuple.getNumOfFields(); i++) {
-            if (tuple_schema.getFieldType(i)==FieldType.INT)
-                System.out.print(tuple.getField(i) + "\t");
-            else
-                System.out.print(tuple.getField(i) + "\t");
-        }
         block.appendTuple(tuple);
         //System.out.print("The table currently have " + relation_reference.getNumOfTuples() + " tuples" + "\n" + "\n");
-        System.out.print("\n");
-        System.out.flush();
     }
-    private void flushToRelation(Relation relation_reference,ArrayList<ArrayList<String>>DataName,ArrayList<ArrayList<String>>DataValues,int start)
+    private void flushToRelation(Relation relation_reference, ArrayList<String>DataName, ArrayList<String> DataValues, int start)
     {
         clearMem();
-        int blockindex=0;
-        Block block_ptr=mem.getBlock(blockindex);
-        for(int i=start;i<DataName.size();++i)
-        {
-            if(block_ptr.isFull())
-            {
-                ++blockindex;
-                if(blockindex>=Config.NUM_OF_BLOCKS_IN_MEMORY)break;
-                block_ptr=mem.getBlock(blockindex);
-            }
-            insertIntoTable(relation_reference,DataName.get(i),DataValues.get(i),block_ptr);
-        }
-        for (int memory_block_index = 0; memory_block_index < Config.NUM_OF_BLOCKS_IN_MEMORY; ++memory_block_index) {
-            if (!mem.getBlock(memory_block_index).isEmpty())
-                relation_reference.setBlock(relation_reference.getNumOfBlocks(), memory_block_index);
-            else break;
-        }
+        Block block_ptr=mem.getBlock(0);
+        insertIntoTable(relation_reference,DataName,DataValues,block_ptr);
+        relation_reference.setBlock(relation_reference.getNumOfBlocks(), 0);
     }
-    public void insertIntoTableNtimes(String TableName,ArrayList<String>DataName1,ArrayList<ArrayList<String>>DataValues)
+
+    public Relation insertIntoTableNtimes(String TableName, ArrayList<String>DataName, ArrayList<String> DataValues)
     {
-        ArrayList<ArrayList<String>>DataName=new ArrayList<ArrayList<String>>();
-        for(int j=0;j<DataValues.size();++j)DataName.add(DataName1);
         Relation relation_reference=schema_manager.getRelation(TableName);
         int capacity=relation_reference.getSchema().getTuplesPerBlock()*Config.NUM_OF_BLOCKS_IN_MEMORY;
-        int times=DataName.size()/capacity+1;
+        int times=(DataName.size() - 1)/capacity+1;
         int start=0;
         while(--times>=0)
         {
             flushToRelation(relation_reference,DataName,DataValues,start);
             start+=capacity;
         }
+        return relation_reference;
     }
 
-    private void getTuplesFromRelation(Relation relation_reference,int start,int number, SearchCondition sc)
+    String getTuplesFromRelation(Relation relation_reference,int start,int number, SearchCondition sc)
     {
+        String ret = "";
         clearMem();
-       relation_reference.getBlocks(start,0,number>Config.NUM_OF_BLOCKS_IN_MEMORY?Config.NUM_OF_BLOCKS_IN_MEMORY:number);
+        relation_reference.getBlocks(start,0,number>Config.NUM_OF_BLOCKS_IN_MEMORY?Config.NUM_OF_BLOCKS_IN_MEMORY:number);
         Block block=null;
         for(int i=0;i<Config.NUM_OF_BLOCKS_IN_MEMORY;++i)
         {
@@ -141,25 +101,27 @@ public class Function {
                 if(sc.isEmpty||sc.satisfy(block.getTuple(j)))
                 {
                     System.out.println(block.getTuple(j));
+                    ret += block.getTuple(j) + "\n";
                 }
             }
         }
+        return ret;
     }
 
-    public void selectFromTable(String TableName,SearchCondition sc)
+    public String selectFromTable(String TableName, SearchCondition sc)
     {
+        System.out.println("SelectFromTable is called.");
+        String ret = "";
         Relation relation_reference=schema_manager.getRelation(TableName);
-        int times=relation_reference.getNumOfBlocks()/Config.NUM_OF_BLOCKS_IN_MEMORY;
+        int times=(relation_reference.getNumOfBlocks() - 1)/Config.NUM_OF_BLOCKS_IN_MEMORY + 1;
         int start=0,number=relation_reference.getNumOfBlocks();
-        if(sc.isEmpty)return ;
-        else {
         while(--times>=0)
         {
-            getTuplesFromRelation(relation_reference,start,number,sc);
+            ret += getTuplesFromRelation(relation_reference,start,number,sc);
             start+=Config.NUM_OF_BLOCKS_IN_MEMORY;
             number-=Config.NUM_OF_BLOCKS_IN_MEMORY;
         }
-        }
+        return ret;
     }
 
 //    private int writeBackToRelation(Relation relation_reference,ArrayList<Tuple>ans,int start,int total)
@@ -325,7 +287,7 @@ public class Function {
         mf.createTable(TableName,field_name,field_type);
         //insert into table
         System.out.println("Insert into table");
-        mf.insertIntoTableNtimes(TableName,field_name,DataValues);
+//        mf.insertIntoTableNtimes(TableName,field_name,DataValues);
         Relation relation_reference=schema_manager.getRelation(TableName);
         System.out.println("-----------relation-------------------------");
         System.out.print(relation_reference + "\n");
