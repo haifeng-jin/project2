@@ -28,6 +28,7 @@
 /home/haifeng/git/project2/tinysql/src/main/java/parser/ParserTokenManager.java
 /home/haifeng/git/project2/tinysql/src/main/java/storageManager/SchemaManager.java
 /home/haifeng/git/project2/tinysql/src/main/java/expression/BooleanFactor.java
+/home/haifeng/git/project2/tinysql/src/main/java/Experiment.java
 /home/haifeng/git/project2/tinysql/src/main/java/expression/Insert.java
 /home/haifeng/git/project2/tinysql/src/main/java/parser/TokenMgrError.java
 /home/haifeng/git/project2/tinysql/src/main/java/expression/DropTable.java

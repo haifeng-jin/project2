@@ -21,7 +21,6 @@ public class TinySql {
         Function.disk.resetDiskTimer();
         while (fileScanner.hasNext()) {
             String statement = fileScanner.nextLine();
-            System.out.println(statement);
             try {
                 new Parser(new StringReader(statement)).statement().execute(function);
             } catch (Exception e){

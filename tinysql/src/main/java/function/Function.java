@@ -76,7 +76,6 @@ public class Function {
 
     public Relation createTable(String TableName, ArrayList<String> DataNames, ArrayList<String> Datatypes)
     {
-        System.out.println("Creating table " + TableName);
         ArrayList<FieldType> field_types=new ArrayList<FieldType>();
         for(String str:Datatypes)field_types.add(str.equals("STR20")?FieldType.STR20:FieldType.INT);
         Schema schema=new Schema(DataNames,field_types);
@@ -86,7 +85,6 @@ public class Function {
 
     public void dropTable(String TableName)
     {
-        System.out.println("Deleting Table "+TableName);
         schema_manager.deleteRelation(TableName);
     }
 
@@ -180,7 +178,6 @@ public class Function {
 
     public String selectFromTable(String TableName, ArrayList<String> dataNames, SearchCondition sc)
     {
-        System.out.println("SelectFromTable is called.");
         String ret = "";
         Relation relation_reference=schema_manager.getRelation(TableName);
         int times=(relation_reference.getNumOfBlocks() - 1)/Config.NUM_OF_BLOCKS_IN_MEMORY + 1;
@@ -215,7 +212,6 @@ public class Function {
 
     public void deleteFromTable(String TableName,SearchCondition sc)
     {
-        System.out.println("Delete is called.");
         Relation relation_reference=schema_manager.getRelation(TableName);
         if(sc.isEmpty)
         {
@@ -296,13 +292,9 @@ public class Function {
         //create table
         mf.createTable(TableName,field_name,field_type);
         //insert into table
-        System.out.println("Insert into table");
 //        mf.insertIntoTableNtimes(TableName,field_name,DataValues);
         Relation relation_reference=schema_manager.getRelation(TableName);
-        System.out.println("-----------relation-------------------------");
-        System.out.print(relation_reference + "\n");
 
-        System.out.println("------------------test select------------------");
 
         SearchCondition SC=new SearchCondition();
 
