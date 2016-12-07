@@ -8,6 +8,7 @@ public class Insert extends Statement {
     String tableName;
     AttributeList list;
     InsertTuples tuples;
+    Select select = null;
 
     public Insert(String tableName, AttributeList list, InsertTuples tuples) {
         this.tableName = tableName;
@@ -15,8 +16,20 @@ public class Insert extends Statement {
         this.tuples = tuples;
     }
 
+    public void setSelect(Select select) {
+        this.select = select;
+    }
+
     public void execute(Function function) {
-        function.insertIntoTableNtimes(tableName, list.nameList, tuples.list.value);
+        if (select == null) {
+            function.insertIntoTableNtimes(tableName, list.nameList, tuples.list.value);
+            return;
+        }
+        select.out = false;
+        select.execute(function);
+        for (ArrayList<String> tuple: select.table) {
+            function.insertIntoTableNtimes(tableName, list.nameList, tuple);
+        }
     }
 
     public String toString() {

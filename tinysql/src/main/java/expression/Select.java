@@ -13,6 +13,8 @@ public class Select extends Statement{
     String orderBy;
     SearchCondition condition;
     static int order;
+    boolean out;
+    ArrayList<ArrayList<String>> table;
 
     public Select(SelectList columnList, TableList tableList, boolean distinct, String orderBy, SearchCondition condition) {
         this.columnList = columnList;
@@ -21,10 +23,11 @@ public class Select extends Statement{
         this.orderBy = orderBy;
         this.condition = condition;
         condition.setTableArray(tableList.list.toArray(new String[]{}));
+        out = true;
     }
 
     public void execute(Function function) {
-        if (!distinct && orderBy == null && tableList.list.size() == 1) {
+        if (!distinct && orderBy == null && tableList.list.size() == 1 && out) {
             function.selectFromTable(tableList.list.get(0), columnList.list, condition);
             return;
         }
@@ -52,7 +55,9 @@ public class Select extends Statement{
                 }
             }
         }
-        output(projectedTable);
+        if (out)
+            output(projectedTable);
+        table = projectedTable;
     }
 
     private boolean tupleEqual(ArrayList<String> strings, ArrayList<String> strings1) {

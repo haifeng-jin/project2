@@ -11,7 +11,7 @@ import java.util.Arrays;
 public class Function {
 
     static MainMemory mem=null;
-    static Disk disk=null;
+    public static Disk disk=null;
     public static SchemaManager schema_manager=null;
     public Function() {
         mem = new MainMemory();

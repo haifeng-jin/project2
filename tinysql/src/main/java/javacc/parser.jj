@@ -82,11 +82,13 @@ InsertTuples insertTuples(): {ValueList list; }
     }
 }
 
-Insert insertStatement(): {Token tableName; AttributeList list; InsertTuples tuples; }
+Insert insertStatement(): {Token tableName; AttributeList list; InsertTuples tuples; Select sel; }
 {
-    "INSERT" "INTO" tableName = <name> "(" list = attributeList() ")" tuples = insertTuples()
+    "INSERT" "INTO" tableName = <name> "(" list = attributeList() ")" (tuples = insertTuples() {sel = null;} | sel = select() {tuples = null;})
     {
-        return new Insert(tableName.image, list, tuples);
+        Insert ret = new Insert(tableName.image, list, tuples);
+        ret.setSelect(sel);
+        return ret;
     }
 }
 

@@ -1,0 +1,11 @@
+/home/haifeng/git/project2/tinysql/src/test/java/expression/DeleteTest.java
+/home/haifeng/git/project2/tinysql/src/test/java/expression/InsertTest.java
+/home/haifeng/git/project2/tinysql/src/test/java/expression/AttributeListTest.java
+/home/haifeng/git/project2/tinysql/src/test/java/expression/SearchConditionTest.java
+/home/haifeng/git/project2/tinysql/src/test/java/expression/SelectTest.java
+/home/haifeng/git/project2/tinysql/src/test/java/expression/CreateTableTest.java
+/home/haifeng/git/project2/tinysql/src/test/java/expression/ValueListTest.java
+/home/haifeng/git/project2/tinysql/src/test/java/expression/DropTableTest.java
+/home/haifeng/git/project2/tinysql/src/test/java/expression/AttributeTypeListTest.java
+/home/haifeng/git/project2/tinysql/src/test/java/parser/ParserTest.java
+/home/haifeng/git/project2/tinysql/src/test/java/function/FunctionTest.java
