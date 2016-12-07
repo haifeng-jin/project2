@@ -164,7 +164,7 @@ Term term(): {Token t;} {
 
 Select select(): {SelectList columnList; TableList tableList; boolean distinct; SearchCondition condition; Token t; } {
     "SELECT" {distinct = false; condition = new SearchCondition(); t=new Token();} ("DISTINCT" { distinct = true; })? columnList = selectList() "FROM" tableList = tableList()
-    ("WHERE" condition = searchCondition())? ("ORDER" "BY" t=<name> | t=<column_name> )? {
+    ("WHERE" condition = searchCondition())? ("ORDER" "BY" (t=<name> | t=<column_name>) )? {
         return new Select(columnList, tableList, distinct, t.image, condition);
     }
 }
