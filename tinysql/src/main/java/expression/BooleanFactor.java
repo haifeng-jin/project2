@@ -1,9 +1,9 @@
 package expression;
 
 import function.Function;
-import storageManager.Tuple;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 
 public class BooleanFactor implements Satisfiable{
     Expression exp1;
@@ -17,10 +17,10 @@ public class BooleanFactor implements Satisfiable{
         this.exp2 = exp2;
     }
 
-    public boolean satisfy(Tuple tuple) {
+    public boolean satisfy(ArrayList<String> tuple) {
         try {
-            String value1 = getValue(exp1, tuple);
-            String value2 = getValue(exp2, tuple);
+            String value1 = exp1.getValue(tuple);
+            String value2 = exp2.getValue(tuple);
             if (compOp.equals("=")) {
                 return value1.equals(value2);
             }
@@ -37,30 +37,6 @@ public class BooleanFactor implements Satisfiable{
             e.printStackTrace();
         }
         return false;
-    }
-
-    private String getValue(Expression exp, Tuple tuple) throws Exception {
-        if (exp.type.equals("integer")) {
-            return exp.getValue(tuple);
-        }
-        if (exp.type.equals("literal")) {
-            return exp.getValue(tuple);
-        }
-        String tableName;
-        String columnName;
-        if (exp.type.equals("column_name")) {
-            tableName = exp.getValue(tuple).split(".")[0];
-            columnName = exp.getValue(tuple).split(".")[1];
-        } else {
-            columnName = exp.getValue(tuple);
-            for (String name : tableArray) {
-                if (Function.schema_manager.getRelation(name).getSchema().getFieldNames().contains(columnName)) {
-                    tableName = name;
-                    break;
-                }
-            }
-        }
-        return tuple.getField(columnName).toString();
     }
 
     public void setTableArray(String[] tableArray) {

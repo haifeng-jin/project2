@@ -1,8 +1,8 @@
 package expression;
 
-import storageManager.Tuple;
+import java.util.ArrayList;
 
 interface Satisfiable {
-    boolean satisfy(Tuple tuple);
+    boolean satisfy(ArrayList<String> tuple);
     void setTableArray(String[] tableArray);
 }

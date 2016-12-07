@@ -1,8 +1,9 @@
 package expression;
 
-import storageManager.Tuple;
+import function.Function;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
 
 public class Expression {
     String type;
@@ -29,16 +30,18 @@ public class Expression {
         this.tableArray = tableArray;
     }
 
-    String getValue(Tuple tuple) throws Exception {
+    String getValue(ArrayList<String> tuple) throws Exception {
         if (op == null) {
+            if (!isInteger(term1))
+                return Function.getField(tableArray, term1, tuple);
             return term1;
         }
         try {
             if (!isInteger(term1)) {
-                term1 = tuple.getField(term1).toString();
+                term1 = Function.getField(tableArray, term1, tuple);
             }
             if (!isInteger(term2)) {
-                term2 = tuple.getField(term2).toString();
+                term2 = Function.getField(tableArray, term2, tuple);
             }
             BigDecimal a = new BigDecimal(term1);
             BigDecimal b = new BigDecimal(term2);

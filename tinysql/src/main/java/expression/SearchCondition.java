@@ -1,5 +1,6 @@
 package expression;
 
+import function.Function;
 import storageManager.Tuple;
 
 import java.util.ArrayList;
@@ -26,12 +27,17 @@ public class SearchCondition implements Satisfiable{
     }
 
     public boolean satisfy(Tuple tuple) {
+        return satisfy(Function.tupleToString(tuple));
+    }
+
+    public boolean satisfy(ArrayList<String> tuple) {
         for (BooleanTerm term : list) {
             if (term.satisfy(tuple)) {
                 return true;
             }
         }
         return false;
+
     }
 
     public String toString() {

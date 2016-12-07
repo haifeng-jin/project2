@@ -19,7 +19,7 @@ public class BooleanTerm implements Satisfiable{
         this.list.addAll(term2.list);
     }
 
-    public boolean satisfy(Tuple tuple) {
+    public boolean satisfy(ArrayList<String> tuple) {
         for (BooleanFactor factor : list) {
             if (!factor.satisfy(tuple)) {
                 return false;

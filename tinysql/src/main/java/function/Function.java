@@ -36,7 +36,15 @@ public class Function {
     }
 
 
-    private ArrayList<Tuple>getAllTuplesFromTuple(String TableName)
+    public static ArrayList<String> tupleToString(Tuple tuple) {
+        ArrayList<String> ret = new ArrayList<String>();
+        for (int i = 0; i < tuple.getNumOfFields(); i++) {
+            ret.add(tuple.getField(i).toString());
+        }
+        return ret;
+    }
+
+    public ArrayList<Tuple> getAllTuplesFromTable(String TableName)
     {
         Relation relation_reference=schema_manager.getRelation(TableName);
         int start=0,total=relation_reference.getNumOfBlocks(),number=total;
@@ -158,6 +166,8 @@ public class Function {
                     }
                     String temp = "";
                     for (String name : dataNames) {
+                        if (name.contains("."))
+                            name = name.split("\\.")[1];
                         temp += tuple.getField(name) + "\t";
                     }
                     System.out.println(temp);
@@ -205,6 +215,7 @@ public class Function {
 
     public void deleteFromTable(String TableName,SearchCondition sc)
     {
+        System.out.println("Delete is called.");
         Relation relation_reference=schema_manager.getRelation(TableName);
         if(sc.isEmpty)
         {
@@ -310,5 +321,49 @@ public class Function {
 
 
 
+    }
+
+    public static String getField(String[] tableArray, String name, ArrayList<String> tuple) {
+        int indexCount = getFieldIndex(tableArray, name);
+        if (indexCount == -1)
+            return name;
+        return tuple.get(indexCount);
+    }
+
+    public static int getFieldIndex(String[] tableArray, String name) {
+        String tableName = tableArray[0];
+        String columnName;
+        if (name.contains(".")) {
+            String[] splited = name.split("\\.");
+            tableName = splited[0];
+            columnName = splited[1];
+        } else {
+            columnName = name;
+            for (String temp : tableArray) {
+                if (schema_manager.getRelation(temp).getSchema().getFieldNames().contains(columnName)) {
+                    tableName = temp;
+                    break;
+                }
+            }
+        }
+        int indexCount = 0;
+        for (String table : tableArray) {
+            if (table.equals(tableName)) {
+                break;
+            }
+            indexCount += schema_manager.getRelation(table).getSchema().getNumOfFields();
+        }
+        boolean found = false;
+        for (String field : schema_manager.getRelation(tableName).getSchema().getFieldNames()) {
+            if (columnName.equals(field)) {
+                found = true;
+                break;
+            }
+            indexCount++;
+        }
+        if (!found) {
+            return -1;
+        }
+        return indexCount;
     }
 }

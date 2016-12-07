@@ -16,15 +16,19 @@ import static org.junit.Assert.*;
 public class FunctionTest {
 
     final static String[] statements = {"CREATE TABLE course (sid INT, homework INT, project INT, exam INT, grade STR20)",
-            "INSERT INTO course (sid, homework, project, exam, grade) VALUES (1, 99, 100, 100, \"A\")",
+            "INSERT INTO course (sid, homework, project, exam, grade) VALUES (1, 99, 100, 200, \"A\")",
+            "INSERT INTO course (sid, homework, project, exam, grade) VALUES (2, 99, 100, 100, \"A\")",
             "SELECT * FROM course",
             "SELECT * FROM course WHERE exam = 100",
-            "SELECT * FROM course WHERE (exam + homework) = 200"
+            "SELECT * FROM course WHERE (exam + homework) = 200",
+            "SELECT sid, course.grade FROM course",
+            "SELECT DISTINCT course.grade, course.grade FROM course WHERE course.grade = \"A\" ORDER BY course.exam",
+            "DELETE FROM course WHERE grade = \"E\""
     };
     final static String[] dataNameArray = {"sid", "homework", "project", "exam", "grade"};
     final static String[] dataTypeArray = {"INT", "INT", "INT", "INT", "STR20"};
     final static String[] dataValueArray1 = {"1", "99", "100", "100", "\"A\""};
-    final static String[] dataValueArray2 = {"2", "99", "100", "100", "\"A\""};
+    final static String[] dataValueArray2 = {"2", "99", "100", "200", "\"A\""};
     final static String tableName = "course";
     final static String searchConditionStatement = "sid = 2";
     static ArrayList<String> dataTypes = null;
@@ -87,7 +91,7 @@ public class FunctionTest {
         assertEquals("******RELATION DUMP BEGIN******\n" +
                 "sid\thomework\tproject\texam\tgrade\t\n" +
                 "0: 1\t99\t100\t100\t\"A\"\t\n" +
-                "1: 2\t99\t100\t100\t\"A\"\t\n" +
+                "1: 2\t99\t100\t200\t\"A\"\t\n" +
                 "******RELATION DUMP END******", relation.toString());
         function.insertIntoTableNtimes(tableName, dataNames, dataValues2);
     }
@@ -100,7 +104,7 @@ public class FunctionTest {
         function.insertIntoTableNtimes(tableName, dataNames, dataValues2);
         searchCondition.setTableArray(new String[]{tableName});
         String selection = function.selectFromTable(tableName, fieldListStar, searchCondition);
-        assertEquals("2\t99\t100\t100\t\"A\"\t\n", selection);
+        assertEquals("2\t99\t100\t200\t\"A\"\t\n", selection);
     }
 
     @Test
@@ -111,7 +115,7 @@ public class FunctionTest {
         function.insertIntoTableNtimes(tableName, dataNames, dataValues2);
         searchCondition.setTableArray(new String[]{tableName});
         String selection = function.selectFromTable(tableName, fieldList, searchCondition);
-        assertEquals("99\t100\t\n", selection);
+        assertEquals("99\t200\t\n", selection);
     }
 
     @Test

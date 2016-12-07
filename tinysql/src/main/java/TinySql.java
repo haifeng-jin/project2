@@ -16,7 +16,7 @@ public class TinySql {
         String filename = scanner.nextLine();
         Scanner fileScanner = new Scanner(new FileInputStream("src/main/resources/test.txt"));
         Function function = new Function();
-        while (true) {
+        while (fileScanner.hasNext()) {
             String statement = fileScanner.nextLine();
             System.out.println(statement);
             try {

@@ -114,6 +114,13 @@ INSERT INTO course2 (sid, exam, grade) VALUES (18, 0, "A")
 INSERT INTO course2 (sid, exam, grade) VALUES (18, 0, "A")
 INSERT INTO course2 (sid, exam, grade) VALUES (18, 0, "A")
 INSERT INTO course2 (sid, exam, grade) VALUES (18, 0, "A")
+SELECT course.sid, course.grade, course2.grade FROM course, course2 WHERE course.sid = course2.sid
+SELECT DISTINCT course.grade, course2.grade FROM course, course2 WHERE course.sid = course2.sid
+SELECT * FROM course, course2 WHERE course.sid = course2.sid ORDER BY course.exam
+SELECT * FROM course, course2 WHERE course.sid = course2.sid AND course.exam = 100 AND course2.exam = 100
+SELECT * FROM course, course2 WHERE course.sid = course2.sid AND course.exam > course2.exam
+SELECT * FROM course, course2 WHERE course.sid = course2.sid AND course.exam > course2.exam AND course.homework = 100
+SELECT DISTINCT course.grade, course2.grade FROM course, course2 WHERE course.sid = course2.sid AND course.grade = "A" AND course2.grade = "A" ORDER BY course.exam
 DROP TABLE course
 DROP TABLE course2
 CREATE TABLE r (a INT, b INT)
@@ -242,6 +249,7 @@ INSERT INTO t (a, c) VALUES (102, 102)
 INSERT INTO t (a, c) VALUES (102, 102)
 INSERT INTO t (a, c) VALUES (102, 102)
 INSERT INTO t (a, c) VALUES (102, 102)
+SELECT * FROM r, s, t WHERE r.a = t.a AND r.b = s.b AND s.c = t.c
 DROP TABLE r
 DROP TABLE s
 DROP TABLE t
@@ -269,6 +277,7 @@ INSERT INTO t4 (c) VALUES (1)
 INSERT INTO t5 (c) VALUES (0)
 INSERT INTO t5 (c) VALUES (0)
 INSERT INTO t6 (c) VALUES (0)
+SELECT * FROM t1, t2, t3, t4, t5, t6
 DROP TABLE t1
 DROP TABLE t2
 DROP TABLE t3
